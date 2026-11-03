@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validar docker-compose
+        run: |
+          cp .env.example .env
+          docker compose config -q
+          docker compose -f docker-compose.yml -f tests/load/docker-compose.test.yml config -q
+
+      - name: ShellCheck
+        run: shellcheck -x scripts/*.sh tests/load/*.sh
+
+      - name: Validar parches JSON
+        run: for f in config/patches/*.json; do python3 -m json.tool "$f" > /dev/null; done
+
+      - name: Buscar secretos subidos por error
+        run: |
+          if git ls-files | grep -qE '(^|/)\.env$'; then
+            echo "::error::.env no debe estar en git"; exit 1
+          fi

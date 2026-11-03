@@ -1,0 +1,16 @@
+# Servidor de PRUEBA para la prueba de carga (no usar en producción).
+# Igual que el real, pero en modo offline y sin whitelist para que los bots
+# puedan entrar, y escuchando solo en localhost.
+#   docker compose -f docker-compose.yml -f tests/load/docker-compose.test.yml up -d mc
+services:
+  mc:
+    ports: !override
+      - "127.0.0.1:25565:25565/tcp"
+    environment:
+      ONLINE_MODE: "FALSE"
+      ENFORCE_SECURE_PROFILE: "FALSE"
+      ENABLE_WHITELIST: "FALSE"
+      ENFORCE_WHITELIST: "FALSE"
+    volumes: !override
+      - ./tests/load/data:/data
+      - ./config/patches:/patches:ro

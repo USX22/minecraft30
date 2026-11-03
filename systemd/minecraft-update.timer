@@ -1,0 +1,10 @@
+[Unit]
+Description=Ejecuta la actualización del servidor cada lunes de madrugada
+
+[Timer]
+OnCalendar=Mon *-*-* 05:00:00
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

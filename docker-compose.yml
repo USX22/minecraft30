@@ -1,0 +1,110 @@
+# =============================================================
+#  Servidor Minecraft para 30+ jugadores
+#  - mc:     servidor Paper (fork optimizado de Minecraft)
+#  - backup: copias de seguridad automáticas del mundo
+#  Las variables vienen de .env (ver .env.example)
+# =============================================================
+name: minecraft30
+
+services:
+  mc:
+    image: itzg/minecraft-server:latest
+    container_name: mc
+    restart: unless-stopped          # se reinicia solo si se cae o si se reinicia la VM
+    stop_grace_period: 2m            # tiempo para guardar el mundo antes de apagar
+    tty: true
+    stdin_open: true
+
+    # --- Endurecimiento del contenedor ---
+    user: "1000:1000"                # no se ejecuta como root
+    cap_drop: [ALL]                  # sin privilegios extra de Linux
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: ${CONTAINER_MEM_LIMIT:-10g}
+    pids_limit: 2048
+
+    ports:
+      # ÚNICO puerto expuesto a internet. RCON (25575) NO se publica.
+      - "25565:25565/tcp"
+
+    environment:
+      EULA: "TRUE"
+      TYPE: PAPER
+      VERSION: ${MC_VERSION:-LATEST}
+      TZ: ${TZ:-UTC}
+
+      # Memoria y flags de JVM recomendadas para Paper (Aikar)
+      MEMORY: ${MC_MEMORY:-8G}
+      USE_AIKAR_FLAGS: "true"
+
+      # Juego
+      MOTD: ${MOTD:-Servidor Minecraft}
+      MAX_PLAYERS: ${MAX_PLAYERS:-40}
+      DIFFICULTY: ${DIFFICULTY:-normal}
+      VIEW_DISTANCE: ${VIEW_DISTANCE:-8}
+      SIMULATION_DISTANCE: ${SIMULATION_DISTANCE:-6}
+      SPAWN_PROTECTION: 16
+      ALLOW_FLIGHT: "false"
+
+      # Seguridad
+      ONLINE_MODE: "TRUE"            # solo cuentas oficiales de Microsoft/Mojang
+      ENFORCE_SECURE_PROFILE: "TRUE" # mensajes de chat firmados
+      ENABLE_WHITELIST: "TRUE"
+      ENFORCE_WHITELIST: "TRUE"      # expulsa a quien saquen de la whitelist
+      WHITELIST: ${WHITELIST:-}
+      OPS: ${SERVER_OWNER:-}         # solo el dueño tiene OP; el resto usa LuckPerms
+      ENABLE_QUERY: "FALSE"
+      ENABLE_RCON: "true"
+      RCON_PASSWORD: ${RCON_PASSWORD:?Define RCON_PASSWORD en .env}
+      BROADCAST_RCON_TO_OPS: "false"
+
+      # Plugins (se descargan/actualizan solos desde Modrinth al arrancar)
+      #  luckperms   -> roles: admin, moderador, etc.
+      #  essentialsx -> kick/ban/mute/tempban, homes, tpa...
+      #  coreprotect -> registro de bloques y rollback anti-griefing
+      #  spark       -> diagnóstico de rendimiento (TPS, lag)
+      #  chunky      -> pregeneración del mundo (evita lag al explorar)
+      MODRINTH_PROJECTS: |-
+        luckperms
+        essentialsx
+        coreprotect
+        spark
+        chunky
+      MODRINTH_DOWNLOAD_DEPENDENCIES: required
+
+      # Operación
+      STOP_SERVER_ANNOUNCE_DELAY: 30 # avisa en el chat 30 s antes de apagar
+      ENABLE_ROLLING_LOGS: "true"
+      ENABLE_AUTOPAUSE: "FALSE"      # siempre encendido (servicio continuo)
+      PATCH_DEFINITIONS: /patches
+
+    volumes:
+      - ./data:/data
+      # Parches de configuración versionados en git (anti-xray, etc.)
+      - ./config/patches:/patches:ro
+
+  backup:
+    image: itzg/mc-backup:latest
+    container_name: mc-backup
+    restart: unless-stopped
+    depends_on:
+      mc:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: ${TZ:-UTC}
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL:-6h}
+      PRUNE_BACKUPS_DAYS: ${PRUNE_BACKUPS_DAYS:-7}
+      INITIAL_DELAY: 5m
+      BACKUP_METHOD: tar
+      TAR_COMPRESS_METHOD: zstd
+      # Usa RCON para pausar el guardado mientras copia (backup consistente)
+      RCON_HOST: mc
+      RCON_PORT: 25575
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      PAUSE_IF_NO_PLAYERS: "false"
+      EXCLUDES: "*.jar,cache,logs,libraries,versions"
+    volumes:
+      - ./data:/data:ro              # solo lectura: el backup no puede dañar el mundo
+      - ./backups:/backups

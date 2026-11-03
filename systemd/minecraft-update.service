@@ -1,0 +1,11 @@
+[Unit]
+Description=Actualización semanal del servidor Minecraft (con backup previo)
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=@RUN_USER@
+WorkingDirectory=@PROJECT_DIR@
+ExecStart=@PROJECT_DIR@/scripts/update.sh
+TimeoutStartSec=30min

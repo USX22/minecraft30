@@ -1,0 +1,12 @@
+{
+  "file": "/data/config/paper-world-defaults.yml",
+  "ops": [
+    { "$set": { "path": "$.anticheat.anti-xray.enabled", "value": true } },
+    { "$set": { "path": "$.anticheat.anti-xray.engine-mode", "value": 1, "value-type": "int" } },
+    { "$set": { "path": "$.chunks.entity-per-chunk-save-limit.arrow", "value": 16, "value-type": "int" } },
+    { "$set": { "path": "$.chunks.entity-per-chunk-save-limit.experience_orb", "value": 16, "value-type": "int" } },
+    { "$set": { "path": "$.chunks.entity-per-chunk-save-limit.snowball", "value": 8, "value-type": "int" } },
+    { "$set": { "path": "$.chunks.entity-per-chunk-save-limit.ender_pearl", "value": 8, "value-type": "int" } },
+    { "$set": { "path": "$.collisions.max-entity-collisions", "value": 4, "value-type": "int" } }
+  ]
+}

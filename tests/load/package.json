@@ -1,0 +1,7 @@
+{
+  "name": "minecraft30-load-test",
+  "private": true,
+  "description": "Prueba de carga: conecta N bots al servidor de prueba",
+  "scripts": { "start": "node bots.js" },
+  "dependencies": { "mineflayer": "^4.20.0" }
+}

@@ -1,0 +1,6 @@
+# Secretos y datos de ejecución (NUNCA subir a git)
+.env
+data/
+backups/
+*.log
+node_modules/

@@ -1,0 +1,12 @@
+[Unit]
+Description=Reglas anti-flood para Minecraft (iptables DOCKER-USER)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/minecraft-firewall.sh
+
+[Install]
+WantedBy=multi-user.target
