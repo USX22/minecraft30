@@ -66,6 +66,7 @@ services:
       #  coreprotect -> registro de bloques y rollback anti-griefing
       #  spark       -> diagnóstico de rendimiento (TPS, lag)
       #  chunky      -> pregeneración del mundo (evita lag al explorar)
+      #  lpc-chat    -> muestra en el chat el prefijo del rol ([Mod], [Admin]...)
       #  viaversion + viabackwards -> permiten entrar con el Minecraft Java
       #               OFICIAL aunque la versión del jugador no coincida
       #               exactamente con la del servidor
@@ -75,6 +76,7 @@ services:
         coreprotect
         spark
         chunky
+        lpc-chat
         viaversion
         viabackwards
       MODRINTH_DOWNLOAD_DEPENDENCIES: required

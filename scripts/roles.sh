@@ -41,9 +41,12 @@ setup() {
   rcon "lp group admin parent add moderador"   >/dev/null
   rcon "lp group owner parent add admin"       >/dev/null
 
-  rcon 'lp group moderador meta setprefix 50 "&9[Mod] "'   >/dev/null
-  rcon 'lp group admin meta setprefix 90 "&c[Admin] "'     >/dev/null
-  rcon 'lp group owner meta setprefix 100 "&6[Dueño] "'    >/dev/null
+  # Prefijos en formato MiniMessage (lo exige el plugin de chat LPC).
+  # 'clear' antes de fijar evita prefijos duplicados si se repite setup.
+  for g in moderador admin owner; do rcon "lp group ${g} meta clear prefix" >/dev/null; done
+  rcon 'lp group moderador meta setprefix 50 "<blue>[Mod]</blue> "'   >/dev/null
+  rcon 'lp group admin meta setprefix 90 "<red>[Admin]</red> "'       >/dev/null
+  rcon 'lp group owner meta setprefix 100 "<gold>[Dueño]</gold> "'    >/dev/null
 
   log "Permisos de jugador (default)..."
   set_perms default \

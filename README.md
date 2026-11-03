@@ -2,6 +2,8 @@
 
 Proyecto de **Sistemas Operativos y Redes**: un servidor de Minecraft Java que
 
+> 🚀 **[TUTORIAL PASO A PASO](docs/TUTORIAL.md)**: una sola lista de pasos, para cualquier persona, desde cero hasta el servidor instalado y **probado** (con tabla de resultados para el informe).
+>
 > 📘 **[MANUAL COMPLETO](docs/MANUAL.md)**: instalación desde cero, conceptos técnicos explicados y guías para jugadores, moderadores, admins, dueño y administradores de sistema.
 
 | Requisito | Cómo se cumple |
@@ -105,7 +107,7 @@ docs/                     Documentación detallada
 
 ## Documentación
 
-**[MANUAL COMPLETO](docs/MANUAL.md)** (empieza aquí). Documentos temáticos:
+**[TUTORIAL PASO A PASO](docs/TUTORIAL.md)** (empieza aquí) · **[MANUAL COMPLETO](docs/MANUAL.md)** (referencia). Documentos temáticos:
 
 1. [Arquitectura y conceptos de SO/Redes](docs/01-arquitectura.md)
 2. [Despliegue en Oracle Cloud (paso a paso)](docs/02-despliegue-oracle-cloud.md)

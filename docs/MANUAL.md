@@ -1,5 +1,7 @@
 # Manual completo del servidor Minecraft "minecraft30"
 
+> ¿Quieres instalarlo y probarlo de principio a fin sin leer todo? Sigue el **[TUTORIAL paso a paso](TUTORIAL.md)** y vuelve aquí cuando necesites detalles.
+
 Este manual explica **todo** lo necesario para instalar, usar, moderar, administrar y mantener el servidor, desde cero. Cada concepto técnico se explica antes de usarse. No hace falta experiencia previa.
 
 ---
@@ -138,6 +140,7 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 | **fail2ban** | Programa que lee los logs y bloquea temporalmente las IPs que fallan repetidamente al entrar por SSH. |
 | **online-mode** | El servidor pregunta a Microsoft si la cuenta que intenta entrar es auténtica. Impide suplantar a otro jugador (por ejemplo, entrar como el dueño). |
 | **RCON** | *Remote Console*: protocolo para enviar comandos de consola al servidor. Protegido por contraseña y **no expuesto a internet**: solo los scripts dentro de la VM lo usan. |
+| **Inmunidad (exempt)** | Los admins, el dueño y los OP tienen permisos `*.exempt`: un moderador no puede silenciarlos, expulsarlos ni banearlos. |
 | **Mínimo privilegio** | Dar a cada persona/programa solo los permisos estrictamente necesarios. |
 | **Escalada de privilegios** | Que alguien con pocos permisos consiga más (ej. un moderador que se hace admin). Los roles están diseñados para impedirlo. |
 | **Anti-xray** | Función de Paper que oculta los minerales a los clientes, de modo que un *hack* de x-ray (ver a través de bloques) no sirve. |
@@ -179,7 +182,7 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 | **Grupo / rol** | Conjunto de permisos con nombre: `default`, `moderador`, `admin`, `owner`. Cada jugador pertenece a uno. |
 | **Herencia (parent)** | Un grupo incluye los permisos de su "padre": `owner` ⊃ `admin` ⊃ `moderador` ⊃ `default`. |
 | **Peso (weight)** | Prioridad del grupo (0, 50, 90, 100). Decide qué prefijo se muestra y quién "gana" en conflictos. |
-| **Prefijo** | Etiqueta en el chat: `[Mod]`, `[Admin]`, `[Dueño]`. |
+| **Prefijo** | Etiqueta en el chat: `[Mod]`, `[Admin]`, `[Dueño]`. La muestra el plugin **LPC**, que usa el formato de colores *MiniMessage* (ej. `<blue>[Mod]</blue> `). |
 | **EssentialsX** | Plugin que añade los comandos de moderación (`/mute`, `/tempban`, `/jail`...) y de jugador (`/home`, `/tpa`...). |
 | **CoreProtect** | Plugin que registra **cada** bloque colocado/roto y cada cofre abierto, con quién y cuándo, y permite deshacerlo (*rollback*). |
 
@@ -224,7 +227,7 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
  │ │                                                                 │ │
  │ │  Docker                                                         │ │
  │ │   ├─ mc        Paper + plugins (LuckPerms, EssentialsX,         │ │
- │ │   │            CoreProtect, spark, Chunky, ViaVersion)          │ │
+ │ │   │            CoreProtect, spark, Chunky, LPC, ViaVersion)     │ │
  │ │   │            usuario sin privilegios, RAM limitada            │ │
  │ │   └─ mc-backup cada 6 h → backups/*.tar.zst (vía RCON interno)  │ │
  │ │                                                                 │ │
@@ -401,7 +404,7 @@ Parámetros: `u:` usuario · `t:` tiempo atrás · `r:` radio en bloques alreded
 > Usa siempre el **radio y tiempo mínimos** necesarios. Un rollback sin `u:` revertiría lo de **todos** los jugadores.
 
 ### 5.5 Lo que un moderador NO puede hacer
-Bans permanentes, modo creativo, darse objetos, cambiar reglas del mundo, nombrar moderadores. Para eso, avisa a un admin.
+Bans permanentes, modo creativo, darse objetos, cambiar reglas del mundo, nombrar moderadores. Tampoco sancionar a admins ni al dueño (son inmunes). Para eso, avisa a un admin o al dueño.
 
 ---
 
@@ -864,6 +867,7 @@ services:
         coreprotect
         spark
         chunky
+        lpc-chat
         viaversion
         viabackwards
         nombre-del-plugin-en-modrinth
@@ -1177,6 +1181,7 @@ Comandos: `systemctl status <unidad>`, `journalctl -u <unidad>`.
 | CoreProtect | <https://docs.coreprotect.net> |
 | spark | <https://spark.lucko.me/docs> |
 | Chunky | <https://modrinth.com/plugin/chunky> |
+| LPC (formato de chat con prefijos) | <https://modrinth.com/plugin/lpc-chat> |
 | ViaVersion / ViaBackwards | <https://viaversion.com> |
 
 ---
