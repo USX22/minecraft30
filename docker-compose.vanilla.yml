@@ -1,0 +1,21 @@
+# =============================================================
+#  MODO VANILLA: servidor OFICIAL de Mojang en lugar de Paper.
+#  Se activa añadiendo en .env:
+#     COMPOSE_FILE=docker-compose.yml:docker-compose.vanilla.yml
+#  y ejecutando:  docker compose up -d
+#
+#  Limitaciones frente a Paper (ver MANUAL.md §12):
+#   - Sin plugins: no hay LuckPerms, EssentialsX, CoreProtect, anti-xray
+#     ni ViaVersion. Los roles se reducen a OP (nivel 3).
+#   - Peor rendimiento: soporta menos jugadores (~20-30 en 2 OCPU).
+#   - Los jugadores deben usar EXACTAMENTE la misma versión que el servidor.
+# =============================================================
+services:
+  mc:
+    environment:
+      TYPE: VANILLA
+      MODRINTH_PROJECTS: ""
+      PATCH_DEFINITIONS: ""
+      # Nivel 3: los OP pueden kick/ban/whitelist/gamemode/tp, pero NO
+      # /stop ni /save-off (que podría estropear los backups)
+      OP_PERMISSION_LEVEL: 3

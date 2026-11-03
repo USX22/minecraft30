@@ -20,6 +20,8 @@ Minecraft simula el mundo en *ticks*. El objetivo son **20 TPS** (un tick cada 5
 
 ## Dimensionamiento para 30 jugadores
 
+**Capacidad estimada:** ~40–50 jugadores con 2 OCPU/12 GB y ~70–100 con 4 OCPU/24 GB usando Paper; con el servidor oficial vanilla, ~20–30 y ~30–40. Detalle en el [MANUAL §3](MANUAL.md#3-cuántos-jugadores-soporta).
+
 | Recurso | Necesidad estimada (Paper, 30 jugadores, distancia 8) | Asignado (VM 2 OCPU / 12 GB) |
 |---|---|---|
 | RAM del servidor (heap) | 5–8 GB | 8 GB (`MC_MEMORY`) |

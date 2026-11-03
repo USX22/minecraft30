@@ -2,13 +2,17 @@
 
 Proyecto de **Sistemas Operativos y Redes**: un servidor de Minecraft Java que
 
+> 📘 **[MANUAL COMPLETO](docs/MANUAL.md)**: instalación desde cero, conceptos técnicos explicados y guías para jugadores, moderadores, admins, dueño y administradores de sistema.
+
 | Requisito | Cómo se cumple |
 |---|---|
-| **30+ jugadores** | Paper (servidor optimizado), JVM afinada (flags de Aikar), mundo pregenerado; límite de 40 jugadores. Se verifica con una [prueba de carga con bots](docs/06-rendimiento.md). |
+| **30+ jugadores** | Paper (servidor optimizado), JVM afinada (flags de Aikar), mundo pregenerado. **Capacidad estimada: ~40–50 jugadores** en la VM gratuita de 2 OCPU/12 GB y ~70–100 con 4 OCPU/24 GB ([MANUAL §3](docs/MANUAL.md#3-cuántos-jugadores-soporta)). Se verifica con una [prueba de carga con bots](docs/06-rendimiento.md). |
+| **Minecraft Java oficial** | Los jugadores usan el cliente **oficial** sin instalar nada; se exigen cuentas oficiales. ViaVersion/ViaBackwards permiten entrar aunque su versión no coincida exactamente. Opcional: el **servidor oficial** de Mojang (vanilla) con una línea en `.env` ([MANUAL §12](docs/MANUAL.md#12-modo-vanilla-servidor-oficial-de-mojang)). |
+| **Acceso desde cualquier IP** | Puerto 25565 abierto a `0.0.0.0/0`: se entra desde casa, la universidad o datos móviles. Quién entra lo decide la whitelist (por nick), no la IP. Puerto 443 opcional para redes restrictivas ([MANUAL §9.13](docs/MANUAL.md#913-puerto-alternativo-para-redes-que-bloquean-el-25565)). |
 | **Funcionamiento continuo** | Docker con `restart: unless-stopped`, *healthcheck*, servicio `systemd` que lo levanta al arrancar la VM. |
 | **Gratis o lo más barato posible** | VM *Always Free* de Oracle Cloud (0 $/mes). Alternativas en [docs/07](docs/07-alternativas-y-costos.md). |
 | **Seguro** | Whitelist, cuentas oficiales (`online-mode`), contenedor sin root, firewall + anti-flood, SSH solo con llave, fail2ban, anti-xray, RCON no expuesto. Ver [docs/03](docs/03-seguridad.md). |
-| **Administradores y moderadores** | LuckPerms con jerarquía `jugador < moderador < admin < dueño`, más EssentialsX (ban/mute/kick) y CoreProtect (deshacer *griefing*). Ver [docs/04](docs/04-administracion.md). |
+| **Administradores y moderadores** | LuckPerms con jerarquía `jugador < moderador < admin < dueño`, más EssentialsX (ban/mute/kick) y CoreProtect (deshacer *griefing*). Varios **administradores de sistema** con acceso SSH propio (`scripts/sysadmins.sh`). Ver [docs/04](docs/04-administracion.md). |
 | **Actualizable** | Actualización semanal automática con aviso a jugadores y backup previo; Paper y plugins se actualizan solos. Ver [docs/05](docs/05-actualizaciones-y-backups.md). |
 | **Backups** | Cada 6 h, comprimidos, 7 días de retención, restauración con un comando. |
 
@@ -45,17 +49,17 @@ Guía completa paso a paso: **[docs/02-despliegue-oracle-cloud.md](docs/02-despl
 En una VM Ubuntu 22.04/24.04 recién creada:
 
 ```bash
-git clone https://github.com/usx22/minecraft30.git ~/minecraft30
+sudo git clone https://github.com/usx22/minecraft30.git /opt/minecraft30 && sudo chown -R "$USER": /opt/minecraft30
 ```
 
 ```bash
-cd ~/minecraft30 && sudo ./scripts/bootstrap-host.sh
+cd /opt/minecraft30 && sudo ./scripts/bootstrap-host.sh
 ```
 
 Cierra la sesión SSH, vuelve a entrar y:
 
 ```bash
-cd ~/minecraft30 && ./scripts/install.sh
+cd /opt/minecraft30 && ./scripts/install.sh
 ```
 
 La primera ejecución crea `.env`: edítalo (tu nick en `SERVER_OWNER`, la whitelist, la memoria) y ejecuta `./scripts/install.sh` otra vez. Al terminar, conéctate a `IP-PÚBLICA:25565`.
@@ -68,6 +72,7 @@ La primera ejecución crea `.env`: edítalo (tu nick en `SERVER_OWNER`, la white
 | Añadir jugadores a la whitelist | `./scripts/whitelist.sh agregar Nick1 Nick2` |
 | Hacer moderador / admin | `./scripts/roles.sh mod Nick` · `./scripts/roles.sh admin Nick` |
 | Quitar rol | `./scripts/roles.sh quitar Nick` |
+| Añadir administrador de sistema | `sudo ./scripts/sysadmins.sh agregar usuario "ssh-ed25519 AAAA..."` |
 | Consola del servidor | `./scripts/console.sh` o `./scripts/console.sh "say Hola"` |
 | Backup inmediato | `./scripts/backup-now.sh` |
 | Restaurar backup | `./scripts/restore.sh` (lista) · `./scripts/restore.sh backups/ARCHIVO` |
@@ -78,6 +83,7 @@ La primera ejecución crea `.env`: edítalo (tu nick en `SERVER_OWNER`, la white
 
 ```
 docker-compose.yml        Servicios: servidor (mc) y backups (mc-backup)
+docker-compose.vanilla.yml Modo opcional con el servidor oficial de Mojang
 .env.example              Plantilla de configuración (el .env real NO va a git)
 config/patches/           Ajustes de Paper versionados (anti-xray, límites de entidades)
 scripts/
@@ -90,6 +96,7 @@ scripts/
   backup-now.sh/restore.sh Backups
   update.sh               Actualización segura
   firewall.sh             Reglas anti-flood (iptables DOCKER-USER)
+  sysadmins.sh            Alta/baja de administradores de sistema (SSH)
 systemd/                  Servicios y timer de systemd
 tests/load/               Prueba de carga con 35 bots (mineflayer)
 docs/                     Documentación detallada
@@ -97,6 +104,8 @@ docs/                     Documentación detallada
 ```
 
 ## Documentación
+
+**[MANUAL COMPLETO](docs/MANUAL.md)** (empieza aquí). Documentos temáticos:
 
 1. [Arquitectura y conceptos de SO/Redes](docs/01-arquitectura.md)
 2. [Despliegue en Oracle Cloud (paso a paso)](docs/02-despliegue-oracle-cloud.md)

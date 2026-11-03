@@ -51,8 +51,7 @@ setup() {
     essentials.tpa essentials.tpaccept essentials.tpdeny essentials.back \
     essentials.msg essentials.reply essentials.mail essentials.mail.send \
     essentials.afk essentials.list essentials.motd essentials.rules \
-    essentials.helpop essentials.ignore essentials.seen \
-    coreprotect.inspect.own
+    essentials.helpop essentials.ignore essentials.seen
 
   log "Permisos de moderador..."
   set_perms moderador \
@@ -66,7 +65,7 @@ setup() {
     essentials.whois essentials.helpop.receive essentials.broadcast \
     essentials.gamemode essentials.gamemode.spectator essentials.gamemode.survival \
     coreprotect.inspect coreprotect.lookup coreprotect.rollback coreprotect.restore \
-    spark.tps spark.healthreport \
+    spark.tps spark.healthreport bukkit.command.tps \
     minecraft.command.whitelist
 
   log "Permisos de admin..."
@@ -91,6 +90,19 @@ set_role() {  # set_role <grupo> <jugador>
   rcon "lp user $2 parent set $1"
   log "$2 ahora es: $1"
 }
+
+# --- Modo vanilla: no hay LuckPerms, solo OP de Minecraft (nivel 3) ---
+vanilla_roles() {
+  case "${1:-}" in
+    setup)  log "Modo vanilla: no hay grupos. Los admins son OP de nivel 3 (ver MANUAL.md §12)." ;;
+    admin)  valid_player "${2:-}"; rcon "op $2"; log "$2 ahora es OP (admin vanilla)." ;;
+    mod)    die "El servidor vanilla no permite moderadores con permisos limitados. Usa 'admin' (OP) o cambia a Paper." ;;
+    quitar) valid_player "${2:-}"; rcon "deop $2" ;;
+    info|lista) echo "Operadores (data/ops.json):"; grep -o '"name": *"[^"]*"' data/ops.json 2>/dev/null | cut -d'"' -f4 ;;
+    *) sed -n '2,12p' "$0"; exit 1 ;;
+  esac
+}
+if is_vanilla; then vanilla_roles "$@"; exit 0; fi
 
 case "${1:-}" in
   setup)  setup ;;

@@ -10,6 +10,9 @@
 #   5. fail2ban: bloquea IPs que intentan adivinar el acceso SSH
 #   6. Swap de 4 GB (colchón ante picos de memoria)
 #   7. Instala los servicios systemd (arranque, firewall y actualización semanal)
+#      y crea el grupo 'mcadmin' para administradores de sistema adicionales
+#
+# Recomendado clonar el proyecto en /opt/minecraft30 (ver MANUAL.md §8).
 set -euo pipefail
 [[ $EUID -eq 0 ]] || { echo "Ejecuta con sudo" >&2; exit 1; }
 
@@ -72,11 +75,20 @@ log "4/7 Configurando firewall..."
 if [[ -f /etc/iptables/rules.v4 ]] && grep -q InstanceServices /etc/iptables/rules.v4; then
   # Imagen de Oracle Cloud: ya trae iptables (bloquea todo menos SSH) y Oracle
   # recomienda NO usar UFW. Solo abrimos 25565 antes de la regla REJECT.
-  if ! iptables -C INPUT -p tcp --dport 25565 -m conntrack --ctstate NEW -j ACCEPT 2>/dev/null; then
-    reject_line="$(iptables -L INPUT --line-numbers | awk '/REJECT/ {print $1; exit}')"
-    iptables -I INPUT "${reject_line:-1}" -p tcp --dport 25565 -m conntrack --ctstate NEW -j ACCEPT
-  fi
-  netfilter-persistent save
+  # Se edita rules.v4 directamente (en vez de 'netfilter-persistent save') para
+  # no guardar también las reglas dinámicas que crea Docker.
+  open_oracle_port() {
+    local port="$1" rule="-A INPUT -p tcp -m state --state NEW -m tcp --dport $1 -j ACCEPT"
+    if ! grep -qF -- "$rule" /etc/iptables/rules.v4; then
+      sed -i "0,/^-A INPUT .*REJECT/s||${rule}\n&|" /etc/iptables/rules.v4
+    fi
+    if ! iptables -C INPUT -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT 2>/dev/null; then
+      local reject_line
+      reject_line="$(iptables -L INPUT --line-numbers | awk '/REJECT/ {print $1; exit}')"
+      iptables -I INPUT "${reject_line:-1}" -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT
+    fi
+  }
+  open_oracle_port 25565
   echo "  Oracle: recuerda abrir también 25565/TCP en la Security List de la VCN (ver docs)."
 else
   apt-get install -y ufw
@@ -126,5 +138,18 @@ systemctl start minecraft-firewall.service minecraft-update.timer
 mkdir -p "$PROJECT_DIR/data" "$PROJECT_DIR/backups"
 chown -R 1000:1000 "$PROJECT_DIR/data" "$PROJECT_DIR/backups"
 
-log "Listo. Cierra la sesión SSH y vuelve a entrar (para el grupo docker) y ejecuta:"
+# Grupo 'mcadmin': todos los administradores de sistema pueden usar el proyecto
+# (ver scripts/sysadmins.sh). data/ y backups/ siguen siendo del UID 1000.
+groupadd -f mcadmin
+usermod -aG mcadmin "$RUN_USER"
+find "$PROJECT_DIR" \( -path "$PROJECT_DIR/data" -o -path "$PROJECT_DIR/backups" \
+     -o -path "$PROJECT_DIR/tests/load/data" \) -prune -o -exec chgrp mcadmin {} +
+find "$PROJECT_DIR" \( -path "$PROJECT_DIR/data" -o -path "$PROJECT_DIR/backups" \
+     -o -path "$PROJECT_DIR/tests/load/data" \) -prune -o -type d -exec chmod g+rwxs {} +
+chmod -R g+rwX "$PROJECT_DIR/.git" "$PROJECT_DIR/scripts" "$PROJECT_DIR/docs" 2>/dev/null || true
+[[ -f "$PROJECT_DIR/.env" ]] && chmod 640 "$PROJECT_DIR/.env"
+git config --system --add safe.directory "$PROJECT_DIR"
+git -C "$PROJECT_DIR" config core.sharedRepository group
+
+log "Listo. Cierra la sesión SSH y vuelve a entrar (para los grupos docker y mcadmin) y ejecuta:"
 echo "    cd $PROJECT_DIR && ./scripts/install.sh"

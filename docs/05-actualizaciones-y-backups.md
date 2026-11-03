@@ -80,7 +80,7 @@ Los backups en la misma VM no sirven si se pierde la VM. Opciones gratuitas:
 **a) Copiar a tu computadora** (lo más simple):
 
 ```bash
-rsync -avz -e "ssh -i tu_llave" ubuntu@IP_PUBLICA:~/minecraft30/backups/ ./backups-minecraft/
+rsync -avz -e "ssh -i tu_llave" ubuntu@IP_PUBLICA:/opt/minecraft30/backups/ ./backups-minecraft/
 ```
 
 **b) Automático a la nube con rclone** (Google Drive 15 GB gratis, o Oracle Object Storage 20 GB *Always Free*). En la VM:
@@ -92,5 +92,5 @@ sudo apt install -y rclone && rclone config
 Crea un *remote* llamado `nube` y añade a `crontab -e`:
 
 ```
-30 */12 * * * rclone copy ~/minecraft30/backups nube:minecraft-backups --max-age 13h
+30 */12 * * * rclone copy /opt/minecraft30/backups nube:minecraft-backups --max-age 13h
 ```

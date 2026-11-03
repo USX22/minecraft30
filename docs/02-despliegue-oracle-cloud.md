@@ -52,11 +52,11 @@ ssh -i ruta/a/tu_llave ubuntu@IP_PUBLICA
 Ya dentro de la VM:
 
 ```bash
-git clone https://github.com/usx22/minecraft30.git ~/minecraft30
+sudo git clone https://github.com/usx22/minecraft30.git /opt/minecraft30 && sudo chown -R "$USER": /opt/minecraft30
 ```
 
 ```bash
-cd ~/minecraft30 && sudo ./scripts/bootstrap-host.sh
+cd /opt/minecraft30 && sudo ./scripts/bootstrap-host.sh
 ```
 
 El script instala Docker, endurece SSH, configura el firewall (detecta la imagen de Oracle y usa sus reglas iptables), fail2ban, swap y los servicios systemd. Tarda unos minutos.
@@ -66,7 +66,7 @@ Sal (`exit`) y vuelve a entrar por SSH para que tu usuario quede en el grupo `do
 ## 5. Configurar e instalar el servidor
 
 ```bash
-cd ~/minecraft30 && ./scripts/install.sh
+cd /opt/minecraft30 && ./scripts/install.sh
 ```
 
 La primera vez solo crea `.env`. Edítalo:

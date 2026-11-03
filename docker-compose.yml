@@ -1,6 +1,8 @@
 # =============================================================
 #  Servidor Minecraft para 30+ jugadores
-#  - mc:     servidor Paper (fork optimizado de Minecraft)
+#  - mc:     servidor Paper (fork optimizado de Minecraft Java)
+#            Para usar el servidor OFICIAL de Mojang (vanilla) ver
+#            docker-compose.vanilla.yml y COMPOSE_FILE en .env
 #  - backup: copias de seguridad automáticas del mundo
 #  Las variables vienen de .env (ver .env.example)
 # =============================================================
@@ -29,7 +31,7 @@ services:
 
     environment:
       EULA: "TRUE"
-      TYPE: PAPER
+      TYPE: PAPER                    # docker-compose.vanilla.yml lo cambia a VANILLA
       VERSION: ${MC_VERSION:-LATEST}
       TZ: ${TZ:-UTC}
 
@@ -64,12 +66,17 @@ services:
       #  coreprotect -> registro de bloques y rollback anti-griefing
       #  spark       -> diagnóstico de rendimiento (TPS, lag)
       #  chunky      -> pregeneración del mundo (evita lag al explorar)
+      #  viaversion + viabackwards -> permiten entrar con el Minecraft Java
+      #               OFICIAL aunque la versión del jugador no coincida
+      #               exactamente con la del servidor
       MODRINTH_PROJECTS: |-
         luckperms
         essentialsx
         coreprotect
         spark
         chunky
+        viaversion
+        viabackwards
       MODRINTH_DOWNLOAD_DEPENDENCIES: required
 
       # Operación

@@ -29,3 +29,8 @@ wait_healthy() {
   done
   return 1
 }
+
+# ¿Está activo el modo vanilla (servidor oficial, sin plugins)?
+is_vanilla() {
+  compose config 2>/dev/null | grep -qE '^\s+TYPE: "?VANILLA"?\s*$'
+}

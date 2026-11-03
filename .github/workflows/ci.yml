@@ -18,6 +18,7 @@ jobs:
           cp .env.example .env
           docker compose config -q
           docker compose -f docker-compose.yml -f tests/load/docker-compose.test.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.vanilla.yml config -q
 
       - name: ShellCheck
         run: shellcheck -x scripts/*.sh tests/load/*.sh
