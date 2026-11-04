@@ -168,7 +168,7 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 |---|---|
 | **Hilo principal** | Minecraft simula el mundo en **un único hilo** (un núcleo). Por eso la velocidad de *cada* núcleo importa más que el número de núcleos. Los demás núcleos se usan para generar terreno, red, guardar y el GC. |
 | **Entidades** | Todo lo que se mueve: mobs, animales, ítems en el suelo, flechas. Muchas entidades juntas (granjas) bajan el TPS. |
-| **spark** | Plugin que mide qué consume tiempo en cada tick (para encontrar la causa del lag). |
+| **spark** | Herramienta (incluida dentro de Paper) que mide qué consume tiempo en cada tick (para encontrar la causa del lag). |
 | **Chunky** | Plugin que pregenera el mundo. |
 | **World border** | Borde del mundo: límite que impide ir más lejos y, por tanto, generar terreno nuevo. |
 
@@ -227,7 +227,7 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
  │ │                                                                 │ │
  │ │  Docker                                                         │ │
  │ │   ├─ mc        Paper + plugins (LuckPerms, EssentialsX,         │ │
- │ │   │            CoreProtect, spark, Chunky, LPC, ViaVersion)     │ │
+ │ │   │            CoreProtect, Chunky, LPC, ViaVersion) + spark   │ │
  │ │   │            usuario sin privilegios, RAM limitada            │ │
  │ │   └─ mc-backup cada 6 h → backups/*.tar.zst (vía RCON interno)  │ │
  │ │                                                                 │ │
@@ -262,12 +262,13 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 
 ## 3. ¿Cuántos jugadores soporta?
 
-**Respuesta corta:** con la VM gratuita de Oracle de 2 OCPU / 12 GB y Paper, se esperan **unos 40–50 jugadores simultáneos con buen rendimiento** (TPS ≈ 20), así que los 30 requeridos tienen margen. Con 4 OCPU / 24 GB, **unos 70–100**. Son **estimaciones**; la cifra real de tu servidor se mide con la prueba de carga (§3.3).
+**Respuesta corta:** en la prueba de carga real de este proyecto, con el servidor **limitado a 2 núcleos** (como la VM gratuita de 2 OCPU), **90 bots conectados a la vez mantuvieron 20 TPS** (cada tick tardó ~15 ms de los 50 ms disponibles). Con 35 bots, ~10 ms. Los bots se mueven al azar pero no exploran lejos ni construyen granjas, y los núcleos ARM de Oracle son algo más lentos que los de la prueba, así que la **estimación prudente para jugadores reales es ~50–70 con 2 OCPU / 12 GB y ~100 con 4 OCPU / 24 GB**, con el mundo pregenerado. Los 30 requeridos tienen mucho margen. Resultados completos en [RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md).
 
 | Máquina | Paper (por defecto) | Vanilla (oficial, §12) |
 |---|---|---|
-| Oracle 2 OCPU / 12 GB (`MC_MEMORY=8G`) | ~40–50 | ~20–30 |
-| Oracle 4 OCPU / 24 GB (`MC_MEMORY=12G`) | ~70–100 | ~30–40 |
+| Prueba real, 2 núcleos, 8 GB (bots) | **90 con TPS 20** (medido) | — |
+| Oracle 2 OCPU / 12 GB (`MC_MEMORY=8G`) | ~50–70 (estimado) | ~20–30 (estimado) |
+| Oracle 4 OCPU / 24 GB (`MC_MEMORY=12G`) | ~100 (estimado) | ~30–40 (estimado) |
 
 `MAX_PLAYERS=40` en `.env` es solo el **límite de admisión** (el jugador 41 ve "servidor lleno"). Puedes subirlo si las pruebas lo respaldan (§9.5).
 
@@ -276,7 +277,7 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 - **Exploración de terreno nuevo:** generar chunks es lo más costoso. Pregenerar (§8.13) multiplica la capacidad.
 - **Distancia de visión:** con `VIEW_DISTANCE=8` cada jugador mantiene (2·8+1)² = 289 chunks; con 12, 625 (más del doble de trabajo).
 - **Granjas y entidades:** 30 jugadores con granjas de mobs gigantes pueden bajar el TPS más que 60 jugadores construyendo.
-- **RAM:** ~150–250 MB por jugador activo, más la base del mundo. 8 GB alcanza para ~50.
+- **RAM:** con 8 GB de heap la prueba con 90 bots no necesitó más memoria (el contenedor se mantuvo en ~8,8 GB).
 - **Red:** ~50–150 kbit/s por jugador → 30 jugadores ≈ 5 Mbit/s; la VM tiene ≥ 1 Gbit/s.
 
 ### 3.2 Por qué Paper soporta más que vanilla
@@ -609,7 +610,7 @@ Cambia como mínimo (explicación de cada variable en §14.1):
 - `WHITELIST=` tu nick y los de los primeros jugadores, separados por comas, sin espacios.
 - `TZ=` tu zona horaria (ej. `America/Bogota`, `America/Lima`, `America/Santiago`, `America/Argentina/Buenos_Aires`, `Europe/Madrid`).
 - `MC_MEMORY` y `CONTAINER_MEM_LIMIT`: `8G`/`10g` si la VM tiene 12 GB; `12G`/`14g` si tiene 24 GB.
-- `MC_VERSION`: déjalo en `LATEST` o fija una versión (recomendado, §9.9).
+- `MC_VERSION_AUTO=true` (déjalo así): el servidor usa sola la versión de Minecraft más nueva que soportan **todos** los plugins (§9.9).
 
 Guarda con `Ctrl+O`, `Enter`, y sal con `Ctrl+X`.
 
@@ -798,7 +799,7 @@ sudo ./scripts/sysadmins.sh agregar ana "ssh-ed25519 AAAA...resto-de-la-llave...
 - **Automáticos:** cada 6 h en `backups/`, se borran a los 7 días. Configurable con `BACKUP_INTERVAL` y `PRUNE_BACKUPS_DAYS`.
 - **Manual (antes de cualquier cambio arriesgado):** `./scripts/backup-now.sh`
 - **Listar:** `./scripts/restore.sh`
-- **Restaurar:** `./scripts/restore.sh backups/world-AAAAMMDD-HHMMSS.tar.zst` → escribe `si`. El mundo actual se mueve a `data.antes-de-restaurar-<fecha>` (bórralo con `sudo rm -rf data.antes-de-restaurar-*` cuando estés seguro).
+- **Restaurar:** `./scripts/restore.sh backups/world-AAAAMMDD-HHMMSS.tar.zst` → escribe `si`. El mundo actual se mueve a `data.antes-de-restaurar-<fecha>` (bórralo con `sudo rm -rf data.antes-de-restaurar-*` cuando estés seguro). Si el backup está dañado, el script lo detecta y **vuelve a poner el mundo anterior** automáticamente.
 
 **Copia fuera de la VM** (elige una):
 
@@ -838,9 +839,11 @@ Añade al final (copia cada 12 h los backups de las últimas 13 h):
 - **Desactivar las automáticas:** `sudo systemctl disable --now minecraft-update.timer` (reactivar: `sudo systemctl enable --now minecraft-update.timer`).
 - **Cambiar el horario:** `sudo systemctl edit --full minecraft-update.timer`, cambia `OnCalendar=` (ej. `Sun *-*-* 04:00:00`) y guarda.
 
-**Cambiar la versión de Minecraft** (recomendado fijarla para estabilidad):
+**Versión de Minecraft.** Con `MC_VERSION_AUTO=true` (por defecto) el servidor elige en cada arranque la versión **más nueva que soportan todos los plugins**. Así nunca deja de arrancar porque un plugin aún no se actualizó, y la actualización semanal avanza de versión sola cuando todos están listos. En el log aparece `Resolved Minecraft version X from Modrinth projects`.
+
+Para **fijar** una versión concreta:
 1. `./scripts/backup-now.sh`
-2. `nano .env` → `MC_VERSION=1.21.4` (la versión deseada).
+2. `nano .env` → `MC_VERSION_AUTO=false` y `MC_VERSION=26.1.2` (la versión deseada).
 3. `./scripts/update.sh --ahora`
 4. Comprueba en los logs que todos los plugins cargaron: `docker compose logs mc | grep -iE "error|could not"`.
 
@@ -865,7 +868,6 @@ services:
         luckperms
         essentialsx
         coreprotect
-        spark
         chunky
         lpc-chat
         viaversion
@@ -940,7 +942,7 @@ sudo sed -i '0,/^-A INPUT .*REJECT/s||-A INPUT -p tcp -m state --state NEW -m tc
 
 **Mensual:**
 - [ ] **Probar una restauración** en el servidor de prueba (un backup que no se ha probado no es un backup). Ejemplo: extraer el último backup en una carpeta temporal y comprobar que contiene `world/level.dat`:
-  `mkdir /tmp/prueba && tar --zstd -xf "$(ls -t backups/*.tar.zst | head -1)" -C /tmp/prueba && ls /tmp/prueba/world && rm -rf /tmp/prueba`
+  `docker run --rm -v "$PWD/backups:/b:ro" --entrypoint tar itzg/mc-backup:latest -tf "/b/$(ls -t backups | head -1)" | grep -m1 "world/level.dat"` (debe mostrar `./world/level.dat`).
 - [ ] Copia fuera de la VM al día (§9.8).
 - [ ] Revisar la lista de administradores de sistema (`sudo ./scripts/sysadmins.sh lista`) y de moderadores/admins (`/lp group admin listmembers`, `/lp group moderador listmembers`). Quitar a quien ya no participe.
 - [ ] Revisar en Oracle **Billing → Cost Analysis** que el costo sea 0 $.
@@ -999,7 +1001,7 @@ Por defecto el servidor es **Paper**, que ejecuta el juego oficial optimizado y 
 | | Paper (por defecto) | Vanilla (oficial) |
 |---|---|---|
 | Cliente que usan los jugadores | Minecraft Java **oficial** | Minecraft Java **oficial** |
-| Jugadores estimados (2 OCPU) | ~40–50 | ~20–30 |
+| Jugadores estimados (2 OCPU) | ~50–70 | ~20–30 |
 | Roles moderador/admin separados | Sí (LuckPerms) | **No**: solo OP |
 | Comandos de moderación (mute, tempban, jail) | Sí (EssentialsX) | Solo `kick`, `ban`, `pardon` |
 | Revertir griefing (CoreProtect) | Sí | **No** (solo restaurar backup) |
@@ -1040,9 +1042,10 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 | `permission denied while trying to connect to the Docker daemon` | No has vuelto a entrar tras `bootstrap-host.sh` | `exit` y vuelve a entrar por SSH |
 | `Define RCON_PASSWORD en .env` | Falta `.env` | `./scripts/install.sh` |
 | `Pon tu nick real en SERVER_OWNER` | No editaste `.env` | §8.9 |
+| `El nick 'X' no existe como cuenta oficial` / log `Could not resolve user from Playerdb` | Nick mal escrito en `SERVER_OWNER` o `WHITELIST` (un nick inexistente impide arrancar) | Corrige el nick en `.env` (mayúsculas incluidas) |
 | `mc` en bucle de reinicios, log con `OutOfMemoryError` o `exit code 137` | Poca RAM | Baja `MC_MEMORY` y `CONTAINER_MEM_LIMIT` (deja ≥ 2 GB de diferencia) |
 | Log: `AccessDeniedException` / `permission denied` en `/data` | Dueño de `data/` incorrecto | `sudo chown -R 1000:1000 data backups` |
-| Log: no encuentra versión compatible de un plugin | Versión de Minecraft recién salida y el plugin aún no se actualizó | Fija `MC_VERSION` a la versión anterior (§9.9) o espera unos días |
+| Log: `No files are available for the project ...` | Fijaste `MC_VERSION` (con `MC_VERSION_AUTO=false`) a una versión que algún plugin aún no soporta | Vuelve a `MC_VERSION_AUTO=true` o fija `MC_VERSION` a la versión anterior (§9.9) o espera unos días |
 | `git pull` dice *dubious ownership* | Repositorio de otro usuario | `sudo git config --system --add safe.directory /opt/minecraft30` |
 | `git pull` falla por cambios locales | Editaste archivos versionados en la VM | `git stash` (guarda tus cambios aparte) y `git pull`; mejor usa el override (§9.10) |
 
@@ -1086,7 +1089,8 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 |---|---|---|
 | `COMPOSE_FILE` | (comentada) | Si se activa con `docker-compose.vanilla.yml`, usa el servidor oficial (§12) |
 | `TZ` | `America/Mexico_City` | Zona horaria (logs, horarios de backup) |
-| `MC_VERSION` | `LATEST` | Versión de Minecraft del servidor |
+| `MC_VERSION_AUTO` | `true` | Usar la versión más nueva que soporten todos los plugins (ignora `MC_VERSION`) |
+| `MC_VERSION` | `LATEST` | Versión fija del servidor (solo si `MC_VERSION_AUTO=false`) |
 | `MOTD` | texto | Mensaje bajo el nombre del servidor en la lista. `§a`, `§e`... son colores |
 | `MAX_PLAYERS` | `40` | Máximo de jugadores conectados a la vez |
 | `DIFFICULTY` | `normal` | `peaceful`, `easy`, `normal`, `hard` |
@@ -1179,7 +1183,7 @@ Comandos: `systemctl status <unidad>`, `journalctl -u <unidad>`.
 | LuckPerms | <https://luckperms.net/wiki> |
 | EssentialsX | <https://essentialsx.net/wiki> |
 | CoreProtect | <https://docs.coreprotect.net> |
-| spark | <https://spark.lucko.me/docs> |
+| spark (incluido en Paper) | <https://spark.lucko.me/docs> |
 | Chunky | <https://modrinth.com/plugin/chunky> |
 | LPC (formato de chat con prefijos) | <https://modrinth.com/plugin/lpc-chat> |
 | ViaVersion / ViaBackwards | <https://viaversion.com> |
@@ -1195,7 +1199,7 @@ Sí. Los jugadores usan el Minecraft Java Edition oficial, sin instalar nada. Ad
 Sí, desde cualquier IP y red con internet: el puerto 25565 está abierto a `0.0.0.0/0`. Lo que decide quién entra es la **whitelist** (por nick), no la IP. Solo algunas redes muy restrictivas bloquean el puerto (§9.13).
 
 **¿Cuántos jugadores soporta?**
-Unos 40–50 con la VM gratuita de 2 OCPU/12 GB y 70–100 con 4 OCPU/24 GB (estimaciones; mídelo con §3.3).
+En la prueba real, 90 bots con 20 TPS usando 2 núcleos. Para jugadores reales, ~50–70 con la VM gratuita de 2 OCPU/12 GB y ~100 con 4 OCPU/24 GB (§3).
 
 **¿Pueden entrar jugadores de Bedrock (móvil, consola)?**
 No con esta configuración. Se podría añadir el plugin Geyser (+ Floodgate) y abrir el puerto UDP 19132, pero queda fuera del alcance de este proyecto.

@@ -195,12 +195,14 @@ y busca el mensaje en el [MANUAL §13](MANUAL.md#13-solución-de-problemas).
 ```
 /plugins
 ```
-✅ En verde: LuckPerms, Essentials, CoreProtect, spark, Chunky, LPC, ViaVersion, ViaBackwards.
+✅ En verde (7): Chunky, CoreProtect, Essentials, LPC, LuckPerms, ViaBackwards, ViaVersion. (spark no aparece porque viene incluido dentro de Paper: prueba `/spark tps`.)
 ❌ Si alguno sale en rojo o falta: `docker compose logs mc | grep -i NombreDelPlugin` (suele ser que aún no es compatible con una versión de Minecraft recién salida; ver [MANUAL §13.1](MANUAL.md#131-instalación-y-arranque)).
 
 ---
 
 ## Parte E — Probar roles y moderación (20 min, con un compañero)
+
+> **Alternativa automática:** `tests/load/roles-test.js` hace todas las comprobaciones de esta parte (y F2) con tres bots, en un servidor de prueba en modo offline (ver [06-rendimiento.md](06-rendimiento.md)). Con el servidor de prueba arrancado: `cd tests/load && npm install && node roles-test.js` → debe terminar con `12/12 pruebas superadas`. Aun así, haz la prueba manual con personas reales al menos una vez.
 
 ### E1. Dar acceso al compañero
 En la VM:
@@ -497,7 +499,7 @@ Envía a los jugadores: la dirección (`IP_PUBLICA` o tu dominio DuckDNS, [MANUA
 |---|---|---|---|---|
 | C7 | Instalación | `healthy`, TPS ≈ 20 | ☐ | |
 | D1 | Conexión con cliente oficial | Entra con prefijo `[Dueño]` | ☐ | |
-| D3 | Plugins | 8 plugins en verde | ☐ | |
+| D3 | Plugins | 7 plugins en verde | ☐ | |
 | E2 | Jugador sin permisos | `/kick` rechazado | ☐ | |
 | E4 | Moderación | mute, kick, tempban funcionan | ☐ | |
 | E5 | Anti-griefing | Rollback restaura los bloques | ☐ | |

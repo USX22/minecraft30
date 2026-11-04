@@ -33,6 +33,10 @@ services:
       EULA: "TRUE"
       TYPE: PAPER                    # docker-compose.vanilla.yml lo cambia a VANILLA
       VERSION: ${MC_VERSION:-LATEST}
+      # true = usar la versión de Minecraft más nueva que soporten TODOS los
+      # plugins (evita que el servidor no arranque porque un plugin aún no se
+      # actualizó). Para fijar MC_VERSION a mano, pon MC_VERSION_AUTO=false.
+      VERSION_FROM_MODRINTH_PROJECTS: ${MC_VERSION_AUTO:-true}
       TZ: ${TZ:-UTC}
 
       # Memoria y flags de JVM recomendadas para Paper (Aikar)
@@ -64,8 +68,8 @@ services:
       #  luckperms   -> roles: admin, moderador, etc.
       #  essentialsx -> kick/ban/mute/tempban, homes, tpa...
       #  coreprotect -> registro de bloques y rollback anti-griefing
-      #  spark       -> diagnóstico de rendimiento (TPS, lag)
       #  chunky      -> pregeneración del mundo (evita lag al explorar)
+      #  (spark, para diagnosticar lag, ya viene incluido dentro de Paper)
       #  lpc-chat    -> muestra en el chat el prefijo del rol ([Mod], [Admin]...)
       #  viaversion + viabackwards -> permiten entrar con el Minecraft Java
       #               OFICIAL aunque la versión del jugador no coincida
@@ -74,7 +78,6 @@ services:
         luckperms
         essentialsx
         coreprotect
-        spark
         chunky
         lpc-chat
         viaversion
@@ -86,6 +89,9 @@ services:
       ENABLE_ROLLING_LOGS: "true"
       ENABLE_AUTOPAUSE: "FALSE"      # siempre encendido (servicio continuo)
       PATCH_DEFINITIONS: /patches
+      # Permite enviar comandos a la consola y leer su respuesta en el log
+      # (necesario para comandos asíncronos como los de LuckPerms)
+      CREATE_CONSOLE_IN_PIPE: "true"
 
     volumes:
       - ./data:/data

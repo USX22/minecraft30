@@ -1,4 +1,4 @@
 source-path=SCRIPTDIR
 external-sources=true
 # ls se usa solo para mostrar listados al humano
-disable=SC2012
+disable=SC2012,SC2119,SC2120

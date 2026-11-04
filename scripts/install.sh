@@ -28,12 +28,23 @@ if [[ "$(stat -c %u data)" != "1000" ]]; then
   log "Ajustando dueño de data/ y backups/ a UID 1000 (requiere sudo)..."
   sudo chown -R 1000:1000 data backups
 fi
+# Los backups contienen el mundo completo: solo el servidor (UID 1000) y el
+# grupo mcadmin pueden entrar en la carpeta (los archivos se crean con modo 666).
+sudo chmod 2750 backups
+if getent group mcadmin >/dev/null; then sudo chgrp mcadmin backups; fi
+
+if [[ "${SKIP_NICK_CHECK:-0}" != "1" ]]; then
+  log "Verificando nicks de SERVER_OWNER y WHITELIST contra Mojang..."
+  owner="$(grep -E '^SERVER_OWNER=' .env | cut -d= -f2-)"
+  wl="$(grep -E '^WHITELIST=' .env | cut -d= -f2- | tr ',' ' ')"
+  # shellcheck disable=SC2086
+  check_nicks "$owner" $wl || die "Corrige los nicks en .env y vuelve a ejecutar."
+fi
 
 log "Descargando imágenes..."
 compose pull
 log "Arrancando (la primera vez tarda varios minutos: descarga Paper y plugins)..."
-compose up -d
-wait_healthy 900 || die "El servidor no arrancó. Revisa: docker compose logs mc"
+start_all || die "El servidor no arrancó. Revisa: docker compose logs mc"
 
 # Reinicio para que se apliquen los parches de config/patches (anti-xray)
 log "Primer arranque OK. Reiniciando una vez para aplicar parches de configuración..."

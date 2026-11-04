@@ -8,7 +8,7 @@ Proyecto de **Sistemas Operativos y Redes**: un servidor de Minecraft Java que
 
 | Requisito | Cómo se cumple |
 |---|---|
-| **30+ jugadores** | Paper (servidor optimizado), JVM afinada (flags de Aikar), mundo pregenerado. **Capacidad estimada: ~40–50 jugadores** en la VM gratuita de 2 OCPU/12 GB y ~70–100 con 4 OCPU/24 GB ([MANUAL §3](docs/MANUAL.md#3-cuántos-jugadores-soporta)). Se verifica con una [prueba de carga con bots](docs/06-rendimiento.md). |
+| **30+ jugadores** | Paper (servidor optimizado), JVM afinada (flags de Aikar), mundo pregenerado. Medido en prueba con 2 núcleos: **90 jugadores (bots) con TPS 20**. Estimación prudente para jugadores reales: **~50–70** con 2 OCPU/12 GB y **~100** con 4 OCPU/24 GB ([MANUAL §3](docs/MANUAL.md#3-cuántos-jugadores-soporta)). Se verifica con una [prueba de carga con bots](docs/06-rendimiento.md) · [resultados](docs/RESULTADOS-PRUEBAS.md). |
 | **Minecraft Java oficial** | Los jugadores usan el cliente **oficial** sin instalar nada; se exigen cuentas oficiales. ViaVersion/ViaBackwards permiten entrar aunque su versión no coincida exactamente. Opcional: el **servidor oficial** de Mojang (vanilla) con una línea en `.env` ([MANUAL §12](docs/MANUAL.md#12-modo-vanilla-servidor-oficial-de-mojang)). |
 | **Acceso desde cualquier IP** | Puerto 25565 abierto a `0.0.0.0/0`: se entra desde casa, la universidad o datos móviles. Quién entra lo decide la whitelist (por nick), no la IP. Puerto 443 opcional para redes restrictivas ([MANUAL §9.13](docs/MANUAL.md#913-puerto-alternativo-para-redes-que-bloquean-el-25565)). |
 | **Funcionamiento continuo** | Docker con `restart: unless-stopped`, *healthcheck*, servicio `systemd` que lo levanta al arrancar la VM. |

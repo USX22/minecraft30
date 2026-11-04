@@ -148,6 +148,7 @@ find "$PROJECT_DIR" \( -path "$PROJECT_DIR/data" -o -path "$PROJECT_DIR/backups"
      -o -path "$PROJECT_DIR/tests/load/data" \) -prune -o -type d -exec chmod g+rwxs {} +
 chmod -R g+rwX "$PROJECT_DIR/.git" "$PROJECT_DIR/scripts" "$PROJECT_DIR/docs" 2>/dev/null || true
 [[ -f "$PROJECT_DIR/.env" ]] && chmod 640 "$PROJECT_DIR/.env"
+chgrp mcadmin "$PROJECT_DIR/backups" && chmod 2750 "$PROJECT_DIR/backups"
 git config --system --add safe.directory "$PROJECT_DIR"
 git -C "$PROJECT_DIR" config core.sharedRepository group
 

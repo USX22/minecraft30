@@ -20,7 +20,7 @@ Minecraft simula el mundo en *ticks*. El objetivo son **20 TPS** (un tick cada 5
 
 ## Dimensionamiento para 30 jugadores
 
-**Capacidad estimada:** ~40–50 jugadores con 2 OCPU/12 GB y ~70–100 con 4 OCPU/24 GB usando Paper; con el servidor oficial vanilla, ~20–30 y ~30–40. Detalle en el [MANUAL §3](MANUAL.md#3-cuántos-jugadores-soporta).
+**Capacidad:** Medido en prueba con 2 núcleos: **90 jugadores (bots) con TPS 20**. Estimación prudente para jugadores reales: **~50–70** con 2 OCPU/12 GB y **~100** con 4 OCPU/24 GB; con el servidor oficial vanilla, ~20–30 y ~30–40. Datos en [RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md) y explicación en el [MANUAL §3](MANUAL.md#3-cuántos-jugadores-soporta).
 
 | Recurso | Necesidad estimada (Paper, 30 jugadores, distancia 8) | Asignado (VM 2 OCPU / 12 GB) |
 |---|---|---|
@@ -71,6 +71,14 @@ docker compose -f docker-compose.yml -f tests/load/docker-compose.test.yml down
 ```bash
 docker compose up -d
 ```
+
+Con el servidor de prueba arrancado también puedes ejecutar la **prueba automática de roles y moderación** (12 comprobaciones: permisos, mute, kick, tempban, rollback de CoreProtect, inmunidad de admins, whitelist):
+
+```bash
+cd tests/load && node roles-test.js
+```
+
+Resultados reales de este proyecto: [RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md).
 
 > Los bots generan **más** carga que jugadores reales en cuanto a movimiento aleatorio, pero no construyen granjas ni redstone. Es una buena estimación, no una garantía.
 

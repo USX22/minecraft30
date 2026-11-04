@@ -36,10 +36,10 @@ Actualizar a mano en cualquier momento:
 ```
 
 ### Cambiar de versión de Minecraft
-Por defecto `MC_VERSION=LATEST`. Para un servidor estable, **fija la versión** (p. ej. `MC_VERSION=1.21.4`) y súbela a propósito cuando los plugins sean compatibles:
+Por defecto `MC_VERSION_AUTO=true`: se usa la versión más nueva que soportan **todos** los plugins, así el servidor nunca deja de arrancar por un plugin desactualizado. Para fijar una versión concreta (`MC_VERSION_AUTO=false`):
 
 1. Haz backup: `./scripts/backup-now.sh`
-2. Cambia `MC_VERSION` en `.env`.
+2. En `.env`: `MC_VERSION_AUTO=false` y `MC_VERSION=26.1.2` (por ejemplo).
 3. `./scripts/update.sh --ahora`
 
 > Nunca bajes de versión un mundo ya abierto con una versión más nueva: restaura un backup anterior.

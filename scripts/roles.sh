@@ -112,7 +112,7 @@ case "${1:-}" in
   admin)  set_role admin "${2:-}" ;;
   mod)    set_role moderador "${2:-}" ;;
   quitar) set_role default "${2:-}" ;;
-  info)   valid_player "${2:-}"; rcon "lp user $2 info" ;;
-  lista)  rcon "lp listgroups" ;;
+  info)   valid_player "${2:-}"; console_out "lp user $2 info" ;;
+  lista)  console_out "lp listgroups" ;;
   *) sed -n '2,12p' "$0"; exit 1 ;;
 esac
