@@ -72,3 +72,4 @@ if uses_playit; then
 else
   log "¡Servidor listo! Conéctate a <IP-pública>:25565"
 fi
+log "Si al entrar no ves [Dueño] delante de tu nombre en el chat, ejecuta: ./scripts/roles.sh setup"

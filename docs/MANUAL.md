@@ -485,7 +485,7 @@ El dueño es el jugador indicado en `SERVER_OWNER` (`.env`). Tiene prefijo `[Due
 | Ver los grupos | `/lp listgroups` |
 | Ver permisos de un grupo | `/lp group moderador permission info` |
 
-También desde la VM con `./scripts/roles.sh` (§9.6). El jugador debe haber entrado alguna vez o tener cuenta oficial (LuckPerms busca su identificador en Microsoft).
+También desde la VM con `./scripts/roles.sh` (§9.6). **El jugador debe haber entrado al servidor al menos una vez**: si no, LuckPerms puede no encontrarlo. `roles.sh` comprueba la asignación y avisa si no se pudo confirmar. Por eso, después de la instalación, el dueño debe entrar una vez y, si no ve `[Dueño]` en el chat, ejecutar `./scripts/roles.sh setup`.
 
 ### 7.2 Cambiar permisos de un grupo
 

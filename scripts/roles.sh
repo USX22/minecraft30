@@ -84,14 +84,27 @@ setup() {
   log "Roles listos: default < moderador < admin < owner"
   owner="$(grep -E '^SERVER_OWNER=' .env | cut -d= -f2- || true)"
   if [[ -n "$owner" ]]; then
-    rcon "lp user ${owner} parent set owner" >/dev/null && log "Dueño '${owner}' asignado al grupo owner."
+    rcon "lp user ${owner} parent set owner" >/dev/null
+    verify_role "$owner" owner
+  fi
+}
+
+# Comprueba en LuckPerms que el jugador quedó en el grupo indicado.
+# (LuckPerms responde de forma asíncrona, por eso se lee la consola.)
+verify_role() {  # verify_role <jugador> <grupo>
+  if CONSOLE_WAIT=3 console_out "lp user $1 info" | grep -qi "Primary Group: $2"; then
+    log "Verificado: '$1' está en el grupo $2."
+  else
+    warn "No se pudo confirmar que '$1' esté en el grupo $2."
+    warn "Suele pasar si el jugador nunca ha entrado al servidor: que entre una vez y repite:"
+    warn "  ./scripts/roles.sh $( [[ $2 == owner ]] && echo setup || echo "${2/moderador/mod} $1" )"
   fi
 }
 
 set_role() {  # set_role <grupo> <jugador>
   valid_player "$2"
-  rcon "lp user $2 parent set $1"
-  log "$2 ahora es: $1"
+  rcon "lp user $2 parent set $1" >/dev/null
+  verify_role "$2" "$1"
 }
 
 # --- Modo vanilla: no hay LuckPerms, solo OP de Minecraft (nivel 3) ---
