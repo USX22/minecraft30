@@ -42,9 +42,9 @@ El precio cambia según la región (East US 2 suele ser de las más baratas). Pu
 ## 3. Ver en qué regiones puedes crear máquinas
 
 Las suscripciones de estudiante solo pueden usar **unas 5 regiones**, distintas para cada persona.
-1. En el portal, busca **Policy** → **Assignments**.
-2. Abre la asignación *Allowed resource deployment regions* → **Parameters**: ahí está tu lista.
-3. Elige la más cercana a los jugadores (menos ping). Si está, *Mexico Central* o *South Central US* son buenas para Latinoamérica; *East US 2* suele ser la más barata.
+1. En el portal, busca **Directiva** (*Policy*) → en el menú izquierdo abre **Creación** → **Tareas** (en el portal en español, *Assignments* aparece traducido como "Tareas").
+2. Abre *Allowed resource deployment regions* → pestaña **Parámetros**: el valor de `listOfAllowedLocations` es tu lista.
+3. Elige la más cercana a los jugadores (menos ping) **en la que exista la máquina** (§1). Ejemplo real de una cuenta de la BUAP: la lista era `norwayeast, northcentralus, westus, chilecentral, belgiumcentral`, y la mejor opción fue **North Central US** (B2pls_v2 a 0,0336 $/h, la más barata; ~60–70 ms de ping desde el centro de México). Chile, Noruega y Bélgica no tenían la máquina ARM.
 
 ## 4. Crear la máquina virtual
 
