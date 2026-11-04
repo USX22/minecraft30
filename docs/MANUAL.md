@@ -482,6 +482,8 @@ También desde la VM con `./scripts/roles.sh` (§9.6). El jugador debe haber ent
 
 Tiempo estimado: 1–2 horas (más la pregeneración, que corre sola). Necesitas: una computadora con internet, una tarjeta (solo para verificar la cuenta de Oracle; no se cobra) y tu cuenta de Minecraft.
 
+> **¿Oracle rechaza tu tarjeta o no tienes una?** Puedes instalar el servidor en una **Raspberry Pi** en tu casa, gratis y sin tarjeta: sigue [docs/08-raspberry-pi.md](08-raspberry-pi.md) en lugar de §8.2–§8.5. El resto del manual aplica igual.
+
 ### 8.1 Crear tu par de llaves SSH (en TU computadora)
 
 **Windows 10/11:** abre **PowerShell** (tecla Windows → escribe "PowerShell" → Enter).

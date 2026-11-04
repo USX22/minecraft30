@@ -7,6 +7,7 @@
 | Opción | Costo mensual | ¿30 jugadores? | 24/7 | Control total | Comentario |
 |---|---|---|---|---|---|
 | **Oracle Cloud Always Free (ARM)** — *elegida* | **0 $** | Sí (2 OCPU/12 GB) | Sí | Sí | Requiere tarjeta para verificar. Puede costar conseguir capacidad ARM. Riesgo de recuperación por inactividad si la cuenta es solo *Free*. |
+| **Raspberry Pi 4/5 (8 GB) + [playit.gg](https://playit.gg)** — *alternativa sin tarjeta* | **0 $** (+ ~5 W de luz) | ~10–15 (hasta ~20 con mundo pregenerado) | Sí | Sí | No pide tarjeta ni cuenta en la nube. Túnel sin abrir puertos. Guía completa: **[docs/08](08-raspberry-pi.md)**. |
 | PC propia/vieja + [playit.gg](https://playit.gg) | 0 $ (+ electricidad) | Depende del hardware (≥ 4 núcleos, 8 GB) | Si la dejas encendida | Sí | Sin abrir puertos del router (túnel). Añade algo de latencia. Ideal como respaldo o para pruebas. |
 | PC propia + port forwarding | 0 $ | Igual que arriba | Igual | Sí | Necesita IP pública (muchas redes residenciales usan CG-NAT y no lo permiten) y expone tu IP de casa. |
 | VPS barato ARM (p. ej. Hetzner CAX21: 4 vCPU / 8 GB) | ~7–9 € | Sí | Sí | Sí | La opción de pago más rentable. El mismo repositorio funciona sin cambios. |
@@ -40,18 +41,13 @@ Como todo está en Docker y en git, mover el servidor es:
 
 ## Usar playit.gg con este repositorio (sin IP pública)
 
-Si usas una PC propia detrás de CG-NAT, añade el agente de playit al `docker-compose.yml`:
+El repositorio ya trae el agente de playit en `docker-compose.raspberrypi.yml` (además limita la CPU para dejar un núcleo libre). Sirve para una Raspberry Pi o cualquier PC de casa con Linux de 64 bits:
 
-```yaml
-  playit:
-    image: ghcr.io/playit-cloud/playit-agent:latest   # revisa la etiqueta actual en la doc de playit
-    restart: unless-stopped
-    network_mode: host
-    environment:
-      SECRET_KEY: ${PLAYIT_SECRET_KEY}
-```
+1. Copia `.env.raspberrypi.example` a `.env` (en una Pi, `install.sh` lo hace solo). Contiene `COMPOSE_FILE=docker-compose.yml:docker-compose.raspberrypi.yml`.
+2. Pon la clave del agente en `PLAYIT_SECRET_KEY`.
+3. Crea un túnel "Minecraft Java" en la web de playit apuntando a `127.0.0.1:25565`.
 
-Crea un túnel "Minecraft Java" en la web de playit apuntando a `127.0.0.1:25565` y pon la clave en `.env`. En ese caso puedes cambiar el puerto publicado del servicio `mc` a `127.0.0.1:25565:25565` para que solo sea accesible por el túnel.
+Paso a paso completo en [docs/08](08-raspberry-pi.md). En una PC que no es Raspberry Pi, ejecuta `bootstrap-host.sh` e `install.sh` con `PERFIL=raspberrypi` delante para usar los mismos ajustes de "servidor en casa".
 
 ## Protección DDoS (opcional)
 [TCPShield](https://tcpshield.com) tiene un plan gratuito que oculta la IP real del servidor detrás de su red. Requiere un dominio propio y configurar el proxy; no es necesario para un servidor de clase.

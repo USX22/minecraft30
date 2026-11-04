@@ -1,0 +1,33 @@
+# =============================================================
+#  MODO RASPBERRY PI (o cualquier PC de casa): 0 $, sin tarjeta.
+#  Se activa en .env con (install.sh lo pone solo en una Raspberry Pi):
+#     COMPOSE_FILE=docker-compose.yml:docker-compose.raspberrypi.yml
+#  Guía completa: docs/08-raspberry-pi.md
+#
+#  Qué cambia respecto a la VM de Oracle:
+#   - Límite de CPU: Minecraft deja libre un núcleo para el resto de la
+#     Pi (Pi-hole, cámaras, dashboards...). Si se satura, el internet
+#     de la casa (DNS de Pi-hole) no se pone lento.
+#   - playit.gg: túnel gratuito para entrar desde cualquier red sin abrir
+#     puertos en el router (sirve también con CG-NAT) y sin mostrar la IP
+#     de la casa.
+#   - Backups con menos prioridad de CPU para que no provoquen lag.
+# =============================================================
+services:
+  mc:
+    cpus: ${CONTAINER_CPUS:-3}
+
+  backup:
+    cpus: 1
+
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:0.16
+    container_name: mc-playit
+    restart: unless-stopped
+    # Red del anfitrión: el túnel entrega a los jugadores en 127.0.0.1:25565
+    network_mode: host
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    environment:
+      SECRET_KEY: ${PLAYIT_SECRET_KEY:?Define PLAYIT_SECRET_KEY en .env (ver docs/08-raspberry-pi.md)}

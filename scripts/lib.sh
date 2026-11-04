@@ -69,6 +69,18 @@ check_nicks() {
   return "$bad"
 }
 
+# ¿Es una Raspberry Pi? (o se forzó con PERFIL=raspberrypi)
+is_raspberry_pi() {
+  [[ "${PERFIL:-}" == "raspberrypi" ]] && return 0
+  [[ "${PERFIL:-}" == "vm" ]] && return 1
+  grep -qa 'Raspberry Pi' /proc/device-tree/model 2>/dev/null
+}
+
+# ¿Está activo el modo Raspberry Pi (túnel de playit.gg)?
+uses_playit() {
+  compose config --services 2>/dev/null | grep -qx playit
+}
+
 # ¿Está activo el modo vanilla (servidor oficial, sin plugins)?
 is_vanilla() {
   compose config 2>/dev/null | grep -qE '^\s+TYPE: "?VANILLA"?\s*$'

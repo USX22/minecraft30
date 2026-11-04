@@ -6,18 +6,30 @@ source "$(dirname "$0")/lib.sh"
 command -v docker >/dev/null || die "Docker no está instalado. Ejecuta antes: sudo ./scripts/bootstrap-host.sh"
 
 if [[ ! -f .env ]]; then
-  cp .env.example .env
+  if is_raspberry_pi; then
+    log "Raspberry Pi detectada: se usa la configuración .env.raspberrypi.example (docs/08)."
+    cp .env.raspberrypi.example .env
+  else
+    cp .env.example .env
+  fi
   pass="$(openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 32)"
   sed -i "s|^RCON_PASSWORD=.*|RCON_PASSWORD=${pass}|" .env
   chmod 640 .env
   getent group mcadmin >/dev/null && chgrp mcadmin .env
   log ".env creado con contraseña RCON aleatoria."
-  warn "Edita .env (SERVER_OWNER, WHITELIST, MC_MEMORY...) y vuelve a ejecutar este script."
+  if is_raspberry_pi; then
+    warn "Edita .env (SERVER_OWNER, WHITELIST y PLAYIT_SECRET_KEY) y vuelve a ejecutar este script."
+  else
+    warn "Edita .env (SERVER_OWNER, WHITELIST, MC_MEMORY...) y vuelve a ejecutar este script."
+  fi
   exit 0
 fi
 
 grep -q 'CAMBIAR_ESTA_CONTRASENA' .env && die "Cambia RCON_PASSWORD en .env"
 grep -q '^SERVER_OWNER=TuNickDeMinecraft' .env && die "Pon tu nick real en SERVER_OWNER (.env)"
+if grep -qE '^COMPOSE_FILE=.*raspberrypi' .env && ! grep -qE '^PLAYIT_SECRET_KEY=.+' .env; then
+  die "Falta PLAYIT_SECRET_KEY en .env. Créala en https://playit.gg (ver docs/08-raspberry-pi.md §4)."
+fi
 # .env tiene la contraseña RCON: solo el dueño y el grupo mcadmin pueden leerlo
 chmod 640 .env
 getent group mcadmin >/dev/null && chgrp mcadmin .env
@@ -54,4 +66,9 @@ wait_healthy 600 || die "El servidor no volvió a arrancar. Revisa: docker compo
 log "Creando roles (LuckPerms)..."
 ./scripts/roles.sh setup
 
-log "¡Servidor listo! Conéctate a <IP-pública>:25565"
+if uses_playit; then
+  log "¡Servidor listo! Desde casa: <IP-de-la-Pi>:25565. Desde fuera: la dirección del túnel"
+  log "que muestra https://playit.gg (ej. algo.joinmc.link). Ver docs/08-raspberry-pi.md §5."
+else
+  log "¡Servidor listo! Conéctate a <IP-pública>:25565"
+fi

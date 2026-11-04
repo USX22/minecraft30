@@ -19,6 +19,11 @@ jobs:
           docker compose config -q
           docker compose -f docker-compose.yml -f tests/load/docker-compose.test.yml config -q
           docker compose -f docker-compose.yml -f docker-compose.vanilla.yml config -q
+          export PLAYIT_SECRET_KEY=prueba
+          docker compose -f docker-compose.yml -f docker-compose.raspberrypi.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.raspberrypi.yml -f docker-compose.vanilla.yml config -q
+          cp .env.raspberrypi.example .env
+          docker compose config -q
 
       - name: ShellCheck
         run: shellcheck -x scripts/*.sh tests/load/*.sh
