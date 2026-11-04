@@ -13,7 +13,7 @@ Proyecto de **Sistemas Operativos y Redes**: un servidor de Minecraft Java que
 | **Bedrock (móvil, Windows, consolas)** | Geyser + Floodgate: los jugadores de Bedrock entran con su cuenta de Xbox/Microsoft, sin comprar Java, al **mismo mundo** ([MANUAL §4.7](docs/MANUAL.md#47-entrar-desde-minecraft-bedrock-móvil-windows-consolas)). |
 | **Acceso desde cualquier IP** | Puerto 25565 abierto a `0.0.0.0/0`: se entra desde casa, la universidad o datos móviles. Quién entra lo decide la whitelist (por nick), no la IP. Puerto 443 opcional para redes restrictivas ([MANUAL §9.13](docs/MANUAL.md#913-puerto-alternativo-para-redes-que-bloquean-el-25565)). |
 | **Funcionamiento continuo** | Docker con `restart: unless-stopped`, *healthcheck*, servicio `systemd` que lo levanta al arrancar la VM. |
-| **Gratis o lo más barato posible** | VM *Always Free* de Oracle Cloud (0 $/mes). **Sin tarjeta:** Raspberry Pi en casa + túnel gratuito de playit.gg (0 $, ~10–20 jugadores) en [docs/08](docs/08-raspberry-pi.md). Otras alternativas en [docs/07](docs/07-alternativas-y-costos.md). |
+| **Gratis o lo más barato posible** | VM *Always Free* de Oracle Cloud (0 $/mes). **Sin tarjeta:** **Azure for Students** con correo institucional (100 $ de crédito, ~3 meses 24/7, 30–36 jugadores medidos) en [docs/09](docs/09-azure-estudiantes.md), o Raspberry Pi en casa + túnel gratuito de playit.gg (0 $, Pi 4: ~10–20 jugadores) en [docs/08](docs/08-raspberry-pi.md). Otras alternativas en [docs/07](docs/07-alternativas-y-costos.md). |
 | **Seguro** | Whitelist, cuentas oficiales (`online-mode`), contenedor sin root, firewall + anti-flood, SSH solo con llave, fail2ban, anti-xray, RCON no expuesto. Ver [docs/03](docs/03-seguridad.md). |
 | **Administradores y moderadores** | LuckPerms con jerarquía `jugador < moderador < admin < dueño`, más EssentialsX (ban/mute/kick) y CoreProtect (deshacer *griefing*). Varios **administradores de sistema** con acceso SSH propio (`scripts/sysadmins.sh`). Ver [docs/04](docs/04-administracion.md). |
 | **Actualizable** | Actualización semanal automática con aviso a jugadores y backup previo; Paper y plugins se actualizan solos. Ver [docs/05](docs/05-actualizaciones-y-backups.md). |
@@ -49,7 +49,7 @@ Más detalle y relación con los temas del curso en [docs/01-arquitectura.md](do
 
 Guía completa paso a paso: **[docs/02-despliegue-oracle-cloud.md](docs/02-despliegue-oracle-cloud.md)**.
 
-> ¿Oracle no acepta tu tarjeta? Usa una **Raspberry Pi** (o una PC de casa): **[docs/08-raspberry-pi.md](docs/08-raspberry-pi.md)**. Los comandos son los mismos; los scripts detectan la Pi solos.
+> ¿Oracle no acepta tu tarjeta? Con **correo institucional**: **[docs/09-azure-estudiantes.md](docs/09-azure-estudiantes.md)** (Azure for Students, sin tarjeta). En casa: **[docs/08-raspberry-pi.md](docs/08-raspberry-pi.md)** (Raspberry Pi o PC). Los comandos son los mismos.
 
 En una VM Ubuntu 22.04/24.04 recién creada:
 
@@ -122,3 +122,4 @@ docs/                     Documentación detallada
 6. [Rendimiento y prueba de carga](docs/06-rendimiento.md)
 7. [Alternativas y costos](docs/07-alternativas-y-costos.md)
 8. [Alternativa gratis sin tarjeta: Raspberry Pi](docs/08-raspberry-pi.md)
+9. [Alternativa sin tarjeta con correo de estudiante: Azure for Students](docs/09-azure-estudiantes.md)

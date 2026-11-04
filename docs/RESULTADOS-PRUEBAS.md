@@ -72,6 +72,15 @@ Los bots ([mineflayer](https://github.com/PrismarineJS/mineflayer)) caminan, cor
 
 > Nota: con más de ~50 bots en un solo proceso, el propio proceso se satura y los bots dejan de enviar su posición; el servidor los expulsa por "flotar" (*Flying is not enabled*). Es la protección anti-trampas funcionando. Por eso `bots.js` admite `BOT_START` para repartir los bots en varios procesos.
 
+## Máquina de 4 GB de RAM (para Azure B2pls_v2 / Raspberry Pi de 4 GB)
+
+| Configuración | Resultado |
+|---|---|
+| Heap 2,75 GB, límite 3,4 GB, 36 bots | ❌ El kernel mató a Java por falta de memoria (*OOM*, uso real 3,47 GB). Docker lo reinició solo |
+| **Heap 2,25 GB (`MC_MEMORY=2304M`), límite 3,3 GB, 2 núcleos, 36 bots** | ✅ **TPS 19,9–20,0**, MSPT 13–15 ms, memoria estable en 2,9 GB, CPU ~40 % de 2 núcleos, sin reinicios |
+
+**Conclusión:** Java necesita ~0,7–0,8 GB además del *heap* (plugins, Geyser, red). En una máquina de 4 GB, 2304M/3300m soporta 30–36 jugadores.
+
 ## Tamaño del mundo (pregeneración con Chunky, 2 núcleos)
 
 | Medida | Valor |

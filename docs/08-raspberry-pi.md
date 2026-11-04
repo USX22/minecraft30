@@ -133,7 +133,7 @@ Cambia:
 - `PLAYIT_SECRET_KEY=` → pega la clave del paso 4.
 - `SERVER_OWNER=` → tu nick de Minecraft.
 - `WHITELIST=` → tu nick y los de tus compañeros, separados por coma.
-- **Solo si tu Pi es de 4 GB:** `MC_MEMORY=2G` y `CONTAINER_MEM_LIMIT=2816m`.
+- **Solo si tu Pi es de 4 GB:** `MC_MEMORY=1792M` y `CONTAINER_MEM_LIMIT=2816m`.
 
 Guarda con `Ctrl+O`, `Enter`, y sal con `Ctrl+X`. Luego vuelve a ejecutar:
 

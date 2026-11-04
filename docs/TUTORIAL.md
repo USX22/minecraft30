@@ -8,7 +8,7 @@ Este tutorial es **lineal**: una sola lista de pasos, en orden, que cualquier pe
 
 **Necesitas:**
 - Una computadora con Windows 10/11, Mac o Linux.
-- Una tarjeta de crédito o débito (solo para verificar la cuenta de Oracle; no se cobra). Las tarjetas virtuales o sin datos impresos suelen ser rechazadas. **Sin tarjeta:** usa una Raspberry Pi con [docs/08-raspberry-pi.md](08-raspberry-pi.md) para la instalación y vuelve a este tutorial para las pruebas.
+- Una tarjeta de crédito o débito (solo para verificar la cuenta de Oracle; no se cobra). Las tarjetas virtuales o sin datos impresos suelen ser rechazadas. **Sin tarjeta:** con correo institucional usa [Azure for Students](09-azure-estudiantes.md), o una Raspberry Pi/PC de casa con [docs/08](08-raspberry-pi.md), para la instalación (en lugar de las partes B y C) y vuelve a este tutorial para las pruebas.
 - Minecraft Java Edition oficial comprado.
 - Para las pruebas de roles: **una segunda persona** con Minecraft (un compañero), o una segunda cuenta.
 - Tiempo: ~2–3 horas (más la pregeneración del mundo, que corre sola).

@@ -7,7 +7,8 @@
 | Opción | Costo mensual | ¿30 jugadores? | 24/7 | Control total | Comentario |
 |---|---|---|---|---|---|
 | **Oracle Cloud Always Free (ARM)** — *elegida* | **0 $** | Sí (2 OCPU/12 GB) | Sí | Sí | Requiere tarjeta para verificar. Puede costar conseguir capacidad ARM. Riesgo de recuperación por inactividad si la cuenta es solo *Free*. |
-| **Raspberry Pi 4/5 (8 GB) + [playit.gg](https://playit.gg)** — *alternativa sin tarjeta* | **0 $** (+ ~5 W de luz) | ~10–15 (hasta ~20 con mundo pregenerado) | Sí | Sí | No pide tarjeta ni cuenta en la nube. Túnel sin abrir puertos. Guía completa: **[docs/08](08-raspberry-pi.md)**. |
+| **Azure for Students** (correo institucional) — *alternativa sin tarjeta* | **0 $** (100 $ de crédito al año) | **Sí: 30–36 medidos** (B2pls_v2, 4 GB) | Sí, mientras dure el crédito (~3 meses) | Sí | Sin tarjeta. Regiones y tamaños limitados para estudiantes. Guía: **[docs/09](09-azure-estudiantes.md)**. |
+| **Raspberry Pi 4/5 (8 GB) + [playit.gg](https://playit.gg)** — *alternativa sin tarjeta* | **0 $** (+ ~5 W de luz) | Pi 4: ~10–20 · Pi 5: ~20–30 (estimado) | Sí | Sí | No pide tarjeta ni cuenta en la nube. Túnel sin abrir puertos. Guía completa: **[docs/08](08-raspberry-pi.md)**. |
 | PC propia/vieja + [playit.gg](https://playit.gg) | 0 $ (+ electricidad) | Depende del hardware (≥ 4 núcleos, 8 GB) | Si la dejas encendida | Sí | Sin abrir puertos del router (túnel). Añade algo de latencia. Ideal como respaldo o para pruebas. |
 | PC propia + port forwarding | 0 $ | Igual que arriba | Igual | Sí | Necesita IP pública (muchas redes residenciales usan CG-NAT y no lo permiten) y expone tu IP de casa. |
 | VPS barato ARM (p. ej. Hetzner CAX21: 4 vCPU / 8 GB) | ~7–9 € | Sí | Sí | Sí | La opción de pago más rentable. El mismo repositorio funciona sin cambios. |
