@@ -27,9 +27,11 @@ console_out() {
     | grep -vE 'RCON (Listener|Client)'
 }
 
-# Valida nombres de jugador de Minecraft (3-16 caracteres, letras/números/_)
+# Valida nombres de jugador: Java (3-16 caracteres, letras/números/_) o
+# Bedrock vía Floodgate (empiezan por "." y los espacios son "_")
 valid_player() {
-  [[ "${1:-}" =~ ^[A-Za-z0-9_]{3,16}$ ]] || die "Nombre de jugador inválido: '${1:-}'"
+  [[ "${1:-}" =~ ^(\.[A-Za-z0-9_]{1,16}|[A-Za-z0-9_]{3,16})$ ]] \
+    || die "Nombre de jugador inválido: '${1:-}'"
 }
 
 # Espera a que el contenedor 'mc' esté "healthy" (máx. $1 segundos)

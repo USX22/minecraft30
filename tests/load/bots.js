@@ -2,6 +2,8 @@
 // SOLO contra tu servidor de prueba (modo offline). Uso:
 //   cd tests/load && npm install
 //   BOTS=35 HOST=127.0.0.1 node bots.js
+// Para más de ~50 bots usa varios procesos (un proceso se satura):
+//   BOTS=30 BOT_START=1 node bots.js & BOTS=30 BOT_START=31 node bots.js &
 // Mientras corre, mide en otra terminal:  ./scripts/console.sh tps
 const mineflayer = require('mineflayer');
 
@@ -9,6 +11,7 @@ const HOST = process.env.HOST || '127.0.0.1';
 const PORT = Number(process.env.PORT || 25565);
 const BOTS = Number(process.env.BOTS || 35);
 const DELAY_MS = Number(process.env.DELAY_MS || 3000); // entre conexiones
+const START = Number(process.env.BOT_START || 1); // primer número de bot (para varios procesos)
 
 let online = 0;
 
@@ -34,4 +37,4 @@ function spawnBot(i) {
   bot.on('end', () => { online = Math.max(0, online - 1); console.log(`[-] bot_${i} desconectado`); });
 }
 
-for (let i = 1; i <= BOTS; i++) setTimeout(() => spawnBot(i), i * DELAY_MS);
+for (let i = START; i < START + BOTS; i++) setTimeout(() => spawnBot(i), (i - START + 1) * DELAY_MS);

@@ -87,7 +87,12 @@ En la página de la instancia → clic en la **Subnet** → **Security Lists** �
 
 → **Add Ingress Rules**.
 
-✅ En la lista de reglas aparece una con puerto `25565` y origen `0.0.0.0/0`.
+Repite (con **+ Another Ingress Rule**) para Minecraft **Bedrock**, también con origen `0.0.0.0/0`:
+- `UDP` puerto `19132`
+- `TCP` puerto `19132`
+- `UDP` puerto `19133`
+
+✅ En la lista de reglas aparecen `25565` (TCP), `19132` (TCP y UDP) y `19133` (UDP), todas con origen `0.0.0.0/0`.
 
 ---
 
@@ -195,8 +200,18 @@ y busca el mensaje en el [MANUAL §13](MANUAL.md#13-solución-de-problemas).
 ```
 /plugins
 ```
-✅ En verde (7): Chunky, CoreProtect, Essentials, LPC, LuckPerms, ViaBackwards, ViaVersion. (spark no aparece porque viene incluido dentro de Paper: prueba `/spark tps`.)
+✅ En verde (9): Chunky, CoreProtect, Essentials, floodgate, Geyser-Spigot, LPC, LuckPerms, ViaBackwards, ViaVersion. (spark no aparece porque viene incluido dentro de Paper: prueba `/spark tps`.)
 ❌ Si alguno sale en rojo o falta: `docker compose logs mc | grep -i NombreDelPlugin` (suele ser que aún no es compatible con una versión de Minecraft recién salida; ver [MANUAL §13.1](MANUAL.md#131-instalación-y-arranque)).
+
+### D4. Entrar desde Bedrock (móvil o Windows)
+1. En Minecraft Bedrock: **Jugar → Servidores → Agregar servidor** → Dirección `IP_PUBLICA`, Puerto `19132` → **Guardar** → entra.
+2. ✅ Te rechaza con un mensaje de whitelist (primer intento: así el servidor conoce tu cuenta).
+3. En la VM:
+```bash
+./scripts/whitelist.sh bedrock "TuGamertag"
+```
+4. Vuelve a entrar. ✅ Apareces en el mismo mundo como `.TuGamertag` y desde Java te ven.
+❌ El servidor no aparece: revisa las reglas de Bedrock de B4 y [MANUAL §13.2](MANUAL.md#132-conexión-de-jugadores).
 
 ---
 
@@ -499,7 +514,8 @@ Envía a los jugadores: la dirección (`IP_PUBLICA` o tu dominio DuckDNS, [MANUA
 |---|---|---|---|---|
 | C7 | Instalación | `healthy`, TPS ≈ 20 | ☐ | |
 | D1 | Conexión con cliente oficial | Entra con prefijo `[Dueño]` | ☐ | |
-| D3 | Plugins | 7 plugins en verde | ☐ | |
+| D3 | Plugins | 9 plugins en verde | ☐ | |
+| D4 | Entrar desde Bedrock | Mismo mundo, nombre `.Gamertag` | ☐ | |
 | E2 | Jugador sin permisos | `/kick` rechazado | ☐ | |
 | E4 | Moderación | mute, kick, tempban funcionan | ☐ | |
 | E5 | Anti-griefing | Rollback restaura los bloques | ☐ | |

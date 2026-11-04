@@ -9,12 +9,14 @@
 #     ni ViaVersion. Los roles se reducen a OP (nivel 3).
 #   - Peor rendimiento: soporta menos jugadores (~20-30 en 2 OCPU).
 #   - Los jugadores deben usar EXACTAMENTE la misma versión que el servidor.
+#   - Sin Bedrock (Geyser es un plugin). Quita también 19132/udp si quieres.
 # =============================================================
 services:
   mc:
     environment:
       TYPE: VANILLA
       MODRINTH_PROJECTS: ""
+      PLUGINS: ""
       PATCH_DEFINITIONS: ""
       # Nivel 3: los OP pueden kick/ban/whitelist/gamemode/tp, pero NO
       # /stop ni /save-off (que podría estropear los backups)

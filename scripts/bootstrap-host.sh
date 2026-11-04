@@ -6,7 +6,7 @@
 #   1. Actualiza el sistema y activa actualizaciones de seguridad automáticas
 #   2. Instala Docker + Docker Compose
 #   3. SSH solo con llave (sin contraseñas, sin login de root)
-#   4. Firewall: solo SSH (22) y Minecraft (25565)
+#   4. Firewall: solo SSH (22), Minecraft Java (25565) y Bedrock (19132-19133)
 #   5. fail2ban: bloquea IPs que intentan adivinar el acceso SSH
 #   6. Swap de 4 GB (colchón ante picos de memoria)
 #   7. Instala los servicios systemd (arranque, firewall y actualización semanal)
@@ -77,25 +77,31 @@ if [[ -f /etc/iptables/rules.v4 ]] && grep -q InstanceServices /etc/iptables/rul
   # recomienda NO usar UFW. Solo abrimos 25565 antes de la regla REJECT.
   # Se edita rules.v4 directamente (en vez de 'netfilter-persistent save') para
   # no guardar también las reglas dinámicas que crea Docker.
-  open_oracle_port() {
-    local port="$1" rule="-A INPUT -p tcp -m state --state NEW -m tcp --dport $1 -j ACCEPT"
+  open_oracle_port() {  # open_oracle_port <puerto> [tcp|udp]
+    local port="$1" proto="${2:-tcp}"
+    local rule="-A INPUT -p $proto -m state --state NEW -m $proto --dport $port -j ACCEPT"
     if ! grep -qF -- "$rule" /etc/iptables/rules.v4; then
       sed -i "0,/^-A INPUT .*REJECT/s||${rule}\n&|" /etc/iptables/rules.v4
     fi
-    if ! iptables -C INPUT -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT 2>/dev/null; then
+    if ! iptables -C INPUT -p "$proto" -m state --state NEW -m "$proto" --dport "$port" -j ACCEPT 2>/dev/null; then
       local reject_line
       reject_line="$(iptables -L INPUT --line-numbers | awk '/REJECT/ {print $1; exit}')"
-      iptables -I INPUT "${reject_line:-1}" -p tcp -m state --state NEW -m tcp --dport "$port" -j ACCEPT
+      iptables -I INPUT "${reject_line:-1}" -p "$proto" -m state --state NEW -m "$proto" --dport "$port" -j ACCEPT
     fi
   }
-  open_oracle_port 25565
-  echo "  Oracle: recuerda abrir también 25565/TCP en la Security List de la VCN (ver docs)."
+  open_oracle_port 25565 tcp   # Java
+  open_oracle_port 19132 udp   # Bedrock (RakNet)
+  open_oracle_port 19132 tcp   # Bedrock (señalización NetherNet)
+  open_oracle_port 19133 udp   # Bedrock (NetherNet)
+  echo "  Oracle: recuerda abrir también en la Security List de la VCN: 25565/TCP, 19132/TCP, 19132/UDP y 19133/UDP (ver docs)."
 else
   apt-get install -y ufw
   ufw default deny incoming
   ufw default allow outgoing
   ufw limit 22/tcp comment 'SSH con limite de intentos'
-  ufw allow 25565/tcp comment 'Minecraft'
+  ufw allow 25565/tcp comment 'Minecraft Java'
+  ufw allow 19132 comment 'Minecraft Bedrock (TCP+UDP)'
+  ufw allow 19133/udp comment 'Minecraft Bedrock NetherNet'
   ufw --force enable
 fi
 

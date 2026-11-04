@@ -56,7 +56,10 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 | Concepto | Explicación |
 |---|---|
 | **Minecraft: Java Edition** | La versión original de Minecraft para PC (Windows, Mac, Linux). Se compra en minecraft.net y se juega con el *launcher* oficial. **Este servidor es para Java Edition.** |
-| **Bedrock Edition** | La versión de consolas, móviles y "Minecraft para Windows" de la Microsoft Store. Usa otro protocolo y **no puede entrar** a este servidor (ver §15). |
+| **Bedrock Edition** | La versión de móviles (Android/iOS), "Minecraft para Windows" de la Microsoft Store y consolas. Usa otro protocolo, pero **sí puede entrar** a este servidor gracias a Geyser y Floodgate (§4.7). |
+| **Geyser** | Plugin que traduce en tiempo real el protocolo de Bedrock al de Java, para que jugadores de ambas ediciones compartan el mismo mundo. |
+| **Floodgate** | Plugin que deja entrar a los jugadores de Bedrock con su cuenta de Xbox/Microsoft, sin necesitar comprar Java. Sus nombres llevan un punto delante: `.Gamertag`. |
+| **Gamertag** | El nombre de la cuenta de Xbox/Microsoft de un jugador de Bedrock. Si tiene espacios, en el servidor se convierten en `_` (ej. `Cool Guy` → `.Cool_Guy`). |
 | **Cliente** | El juego que cada jugador tiene en su computadora. |
 | **Servidor** | Un programa que guarda el mundo y sincroniza a todos los clientes. No tiene gráficos; corre en una máquina remota. |
 | **Versión / protocolo** | Cada versión de Minecraft (1.20.4, 1.21.4...) habla un "idioma" de red ligeramente distinto. Normalmente cliente y servidor deben tener la misma versión. Aquí ViaVersion/ViaBackwards traducen entre versiones (ver §4.3). |
@@ -87,6 +90,9 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 | **IP privada** | IP solo válida dentro de una red local (ej. `10.0.0.5`, `192.168.1.10`). La VM tiene una privada; Oracle traduce la pública a la privada. |
 | **Puerto** | Número (0–65535) que identifica *qué programa* dentro de una máquina recibe la conexión. Si la IP es el edificio, el puerto es el número de departamento. Minecraft Java usa **25565**. SSH usa **22**. |
 | **TCP** | Protocolo de transporte fiable (reenvía paquetes perdidos, mantiene el orden). Minecraft Java usa TCP. |
+| **UDP** | Protocolo de transporte sin conexión: más rápido, pero no garantiza la entrega. Minecraft Bedrock usa UDP (con su propio sistema de fiabilidad, RakNet). Hay que abrir los puertos UDP aparte de los TCP. |
+| **RakNet / NetherNet** | Los dos métodos de conexión de Bedrock: RakNet es el clásico (UDP 19132); NetherNet es el nuevo, basado en WebRTC (señalización por TCP 19132 + datos por UDP 19133). El servidor acepta ambos. |
+| **STUN** | Servicio que le dice a un servidor cuál es su IP pública vista desde internet. Geyser lo usa para NetherNet. |
 | **NAT** | *Network Address Translation*: un router hace que muchas máquinas con IP privada salgan a internet con **una sola IP pública**. Ej.: todos los alumnos en la red de la universidad aparecen con la misma IP. Importante para los límites por IP y para no banear IPs (ver §6.4). |
 | **CG-NAT** | NAT del proveedor de internet: tu casa no tiene IP pública propia. No afecta a los **jugadores** (solo salen hacia el servidor), sí a quien quiera *alojar* un servidor en casa. |
 | **Port forwarding / DNAT** | Redirigir un puerto de una IP a otra máquina/puerto. Docker redirige el 25565 de la VM al contenedor. |
@@ -217,17 +223,19 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 
 ```
    Jugadores (casas, universidad, datos móviles: CUALQUIER IP)
-                 │  Minecraft Java oficial → IP_PUBLICA:25565 (TCP)
+                 │  Java oficial  → IP_PUBLICA:25565 (TCP)
+                 │  Bedrock       → IP_PUBLICA:19132 (UDP; NetherNet: TCP 19132 + UDP 19133)
                  ▼
  ┌─ Oracle Cloud ─────────────────────────────────────────────────────┐
- │  Security List: permite 25565 y 22 desde 0.0.0.0/0 (cualquier IP)   │
+ │  Security List: 22, 25565, 19132-19133 desde 0.0.0.0/0 (cualq. IP)  │
  │ ┌─ VM Ubuntu ────────────────────────────────────────────────────┐ │
  │ │ Firewall (iptables/UFW) + anti-flood por IP (MC-PROTECT)        │ │
  │ │ SSH (22): solo llaves + fail2ban  ◄── administradores de sistema│ │
  │ │                                                                 │ │
  │ │  Docker                                                         │ │
  │ │   ├─ mc        Paper + plugins (LuckPerms, EssentialsX,         │ │
- │ │   │            CoreProtect, Chunky, LPC, ViaVersion) + spark   │ │
+ │ │   │            CoreProtect, Chunky, LPC, ViaVersion, Geyser,    │ │
+ │ │   │            Floodgate) + spark                               │ │
  │ │   │            usuario sin privilegios, RAM limitada            │ │
  │ │   └─ mc-backup cada 6 h → backups/*.tar.zst (vía RCON interno)  │ │
  │ │                                                                 │ │
@@ -249,6 +257,8 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 8. Paper comprueba la whitelist.
 9. LuckPerms carga su grupo (permisos y prefijo). El jugador aparece en el mundo.
 
+Un jugador de **Bedrock** entra por el puerto 19132: Geyser recibe la conexión, Floodgate comprueba su cuenta de Xbox/Microsoft y le asigna el nombre `.Gamertag`, y a partir de ahí sigue los pasos 8–9 como cualquier jugador de Java (whitelist y roles).
+
 ### 2.3 Capas de seguridad (resumen)
 1. Firewall de Oracle → 2. Firewall de la VM → 3. Anti-flood por IP → 4. SSH solo con llave + fail2ban → 5. Actualizaciones automáticas de Ubuntu → 6. Contenedor sin privilegios → 7. online-mode → 8. Whitelist → 9. Roles con mínimo privilegio → 10. Anti-xray → 11. CoreProtect + backups para recuperarse. Detalle en [03-seguridad.md](03-seguridad.md).
 
@@ -261,6 +271,8 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 ---
 
 ## 3. ¿Cuántos jugadores soporta?
+
+**¿Y 100 jugadores?** Es posible con la VM de **4 OCPU / 24 GB** (si tu cuota la permite), con el mundo pregenerado y algo menos de distancia de visión (`VIEW_DISTANCE=7`, `SIMULATION_DISTANCE=5`), subiendo `MAX_PLAYERS=100`. Con 2 OCPU no se recomienda: 100 jugadores reales explorando es demasiado. La prueba con 104 bots en la máquina de pruebas (4 núcleos) dio ~14,5 TPS, pero ahí los propios bots consumían la mitad de la CPU, así que no es concluyente: hay que medirlo en Oracle lanzando los bots desde **otra** máquina (§3.3).
 
 **Respuesta corta:** en la prueba de carga real de este proyecto, con el servidor **limitado a 2 núcleos** (como la VM gratuita de 2 OCPU), **90 bots conectados a la vez mantuvieron 20 TPS** (cada tick tardó ~15 ms de los 50 ms disponibles). Con 35 bots, ~10 ms. Los bots se mueven al azar pero no exploran lejos ni construyen granjas, y los núcleos ARM de Oracle son algo más lentos que los de la prueba, así que la **estimación prudente para jugadores reales es ~50–70 con 2 OCPU / 12 GB y ~100 con 4 OCPU / 24 GB**, con el mundo pregenerado. Los 30 requeridos tienen mucho margen. Resultados completos en [RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md).
 
@@ -348,6 +360,21 @@ Para comprobar si tu red bloquea el puerto (desde tu computadora, no desde Minec
 
 ### 4.6 Normas básicas
 No destruyas ni robes construcciones ajenas, no uses hacks (x-ray, fly, kill-aura), respeta en el chat. Todo queda registrado (CoreProtect) y puede revertirse.
+
+### 4.7 Entrar desde Minecraft Bedrock (móvil, Windows, consolas)
+Requisitos: Minecraft Bedrock comprado y una **cuenta de Xbox/Microsoft** (gratuita). No hace falta comprar la edición Java.
+
+1. Envía tu **gamertag** exacto a un administrador (aparece en la pantalla principal de Minecraft, arriba a la derecha).
+2. **Intenta entrar una vez** (pasos 3–5). Te rechazará con un mensaje de whitelist: es normal, así el servidor conoce tu cuenta. Avisa al administrador para que te añada (§9.4) y vuelve a entrar.
+3. **Jugar → Servidores → Agregar servidor** (al final de la lista de servidores).
+4. **Nombre:** el que quieras. **Dirección:** `IP_PUBLICA` (o el dominio). **Puerto:** `19132`.
+5. **Guardar** y pulsa el servidor para entrar.
+
+Dentro del juego tu nombre aparece con un punto delante (`.TuGamertag`); si tiene espacios, se cambian por `_`. Juegas en el **mismo mundo** que los jugadores de Java y los comandos (`/home`, `/tpa`...) son iguales.
+
+**Consolas (Xbox, PlayStation, Switch):** no permiten añadir servidores externos desde el menú. Hay soluciones de la comunidad (por ejemplo, *BedrockConnect*, que se configura cambiando el DNS de la consola), pero quedan fuera de este manual. En **Android, iOS y Windows** funciona directamente.
+
+**Diferencias para jugadores de Bedrock:** algunas mecánicas muy concretas de Java (ciertos trucos de redstone o de combate) pueden comportarse distinto, porque el juego que corre es el de Java.
 
 ---
 
@@ -545,6 +572,14 @@ Instancia → enlace de la **Subnet** → **Security Lists** → **Default Secur
 | Destination Port Range | `25565` |
 | Description | Minecraft |
 
+**Añade también estas tres reglas para Minecraft Bedrock** (pulsa **+ Another Ingress Rule** para cada una), todas con Source CIDR `0.0.0.0/0`:
+
+| IP Protocol | Destination Port Range | Description |
+|---|---|---|
+| UDP | `19132` | Bedrock (RakNet) |
+| TCP | `19132` | Bedrock (señalización NetherNet) |
+| UDP | `19133` | Bedrock (NetherNet) |
+
 **Add Ingress Rules**. El puerto 22 (SSH) ya viene abierto a `0.0.0.0/0`, lo que permite a los administradores de sistema entrar desde cualquier lugar (protegido por llaves y fail2ban). **No abras el 25575 (RCON).**
 
 ### 8.6 Conectarte a la VM
@@ -655,8 +690,25 @@ Prueba de reinicio (el servidor debe volver solo en ~3 minutos):
 sudo reboot
 ```
 
-### 8.13 Pregenerar el mundo
-Hazlo antes de abrir el servidor a todos. Genera un radio de 3000 bloques (≈ 6 km de lado):
+### 8.13 Tamaño del mundo y pregeneración
+
+Un mundo de Minecraft es prácticamente infinito (30 millones de bloques hacia cada lado), pero cada zona nueva que alguien explora hay que **generarla** (mucha CPU) y **guardarla** (disco y backups). Por eso se elige un tamaño, se **pregenera** antes de abrir el servidor y se pone un **borde de mundo**. 1 bloque = 1 metro.
+
+Datos **medidos** en la prueba del proyecto (2 núcleos, como la VM gratuita de 2 OCPU): 2×2 km = 16.129 chunks, **16 min 45 s** (~16 chunks/s), **168 MB** en disco y **110 MB** por backup comprimido. A partir de ahí (crece con el área):
+
+| Radio (`chunky radius`) | Lado del mundo | Superficie | Pregeneración (2 OCPU) | Disco | Backups (28 = 7 días × 4/día) | Recomendado para |
+|---|---|---|---|---|---|---|
+| 1000 | 2 × 2 km | 4 km² | ~17 min | ~170 MB | ~3 GB | Pruebas |
+| 2000 | 4 × 4 km | 16 km² | ~1 h 10 min | ~0,7 GB | ~12 GB | Hasta ~20 jugadores |
+| **3000 (por defecto)** | **6 × 6 km** | **36 km²** | **~2 h 30 min** | **~1,5 GB** | **~28 GB** | **30–60 jugadores** |
+| 4000 | 8 × 8 km | 64 km² | ~4 h 30 min | ~2,7 GB | ~50 GB | 60–100 jugadores |
+| 5000 | 10 × 10 km | 100 km² | ~7 h | ~4,2 GB | ~77 GB ⚠ | Ver nota |
+
+Con el tamaño por defecto, cada uno de 30 jugadores tiene en promedio más de 1 km² (~1000 × 1000 bloques): sobra espacio. El Nether ocupa 8 veces menos distancia (1 bloque del Nether = 8 del mundo normal), así que basta con un radio de ~1000. Los tamaños **crecen** a medida que los jugadores construyen.
+
+> ⚠ El disco gratuito total de Oracle es de 200 GB. Con mundos de 8 km o más, amplía el boot volume a ~150–200 GB o baja `PRUNE_BACKUPS_DAYS` (por ejemplo a 3) para que los backups quepan.
+
+Hazlo antes de abrir el servidor a todos. Para el tamaño por defecto (radio de 3000 bloques ≈ 6 km de lado):
 
 ```bash
 ./scripts/console.sh "chunky radius 3000"
@@ -678,7 +730,21 @@ Cuando termine, fija el borde para que no se genere más terreno:
 ./scripts/console.sh "worldborder set 6000"
 ```
 
-Repite con el Nether si quieres (`chunky world world_nether`, `chunky radius 1000`, `chunky start`).
+Cuando termine el mundo normal, pregenera el Nether (radio 1000) y vuelve a seleccionar el mundo normal:
+
+```bash
+./scripts/console.sh "chunky world minecraft:the_nether"
+```
+
+```bash
+./scripts/console.sh "chunky radius 1000"
+```
+
+```bash
+./scripts/console.sh "chunky start"
+```
+
+Al terminar: `./scripts/console.sh "chunky world minecraft:overworld"`. El borde del Nether se fija desde dentro del Nether con `/worldborder set 2000` (como admin).
 
 ### 8.14 Nombre de dominio gratuito (opcional)
 1. Entra en <https://www.duckdns.org> e inicia sesión (GitHub, Google...).
@@ -759,6 +825,16 @@ La consola tiene **todos** los permisos (como el dueño).
 
 Para dar acceso a toda la clase de una vez, pasa todos los nicks separados por espacios. Los nicks se validan (3–16 caracteres: letras, números y `_`).
 
+**Jugadores de Bedrock** (por gamertag, entre comillas si tiene espacios). El jugador debe haber **intentado entrar una vez** antes (si no, Floodgate responde *"Unable to find user in our cache"*):
+
+```bash
+./scripts/whitelist.sh bedrock "Gamertag Del Jugador"
+```
+
+```bash
+./scripts/whitelist.sh quitar-bedrock "Gamertag Del Jugador"
+```
+
 ### 9.5 Cambiar la configuración del juego
 1. `nano .env` y cambia la variable (ej. `MAX_PLAYERS=60`, `VIEW_DISTANCE=10`, `DIFFICULTY=hard`, `MOTD=...`).
 2. Guarda y aplica: `docker compose up -d` (reinicia el servidor ~1–2 min).
@@ -774,6 +850,8 @@ Todas las variables: §14.1.
 | Quitar rol | `./scripts/roles.sh quitar Nick` |
 | Ver | `./scripts/roles.sh info Nick` |
 | Recrear grupos y permisos (tras editar el script) | `./scripts/roles.sh setup` |
+
+Para jugadores de **Bedrock** usa su nombre dentro del servidor, con el punto: `./scripts/roles.sh mod .Cool_Guy` (debe haber entrado al menos una vez). En el chat del juego, igual: `/mute .Cool_Guy 10m`.
 
 ### 9.7 Añadir y quitar administradores de sistema
 Un administrador de sistema adicional garantiza que, si pierdes tu llave, alguien más puede entrar.
@@ -1007,6 +1085,7 @@ Por defecto el servidor es **Paper**, que ejecuta el juego oficial optimizado y 
 | Revertir griefing (CoreProtect) | Sí | **No** (solo restaurar backup) |
 | Anti-xray | Sí | No |
 | Entrar con otras versiones del cliente | Sí (ViaVersion) | No, versión exacta |
+| Jugadores de Bedrock (móvil, Windows) | Sí (Geyser + Floodgate) | No |
 | Backups, actualizaciones, firewall, whitelist, online-mode | Sí | Sí |
 
 ### 12.2 Activarlo
@@ -1059,6 +1138,8 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 | *You are not whitelisted* | `./scripts/whitelist.sh agregar Nick` (nick exacto). |
 | *Failed to verify username* | Problema de sesión del jugador o caída de los servidores de Microsoft. Si les pasa a todos a la vez, espera. |
 | *Incompatible client* | §4.3. |
+| Bedrock: el servidor no aparece / *Unable to connect to world* | 1) Reglas UDP 19132, TCP 19132 y UDP 19133 en la Security List (§8.5). 2) En la VM: `sudo iptables -L INPUT -n` debe incluir esos puertos (si no, repite `bootstrap-host.sh`). 3) `docker compose logs mc \| grep -i geyser` debe mostrar *Started Geyser on UDP port 19132*. |
+| Bedrock: *You are not whitelisted* | `./scripts/whitelist.sh bedrock "Gamertag"` (después de un primer intento de entrar). |
 
 ### 13.3 Rendimiento (lag)
 
@@ -1149,6 +1230,9 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 | 22 | TCP | Internet (cualquier IP), solo llaves + fail2ban | SSH (administradores de sistema) |
 | 25565 | TCP | Internet (cualquier IP), con anti-flood | Minecraft Java |
 | 443 | TCP | Opcional (§9.13) | Minecraft por puerto alternativo |
+| 19132 | UDP | Internet (cualquier IP) | Minecraft Bedrock, conexión clásica (RakNet) |
+| 19132 | TCP | Internet (cualquier IP) | Minecraft Bedrock, señalización NetherNet |
+| 19133 | UDP | Internet (cualquier IP) | Minecraft Bedrock, conexión nueva (NetherNet) |
 | 25575 | TCP | **Solo red interna de Docker** | RCON |
 
 ### 14.5 Permisos por rol
@@ -1201,8 +1285,8 @@ Sí, desde cualquier IP y red con internet: el puerto 25565 está abierto a `0.0
 **¿Cuántos jugadores soporta?**
 En la prueba real, 90 bots con 20 TPS usando 2 núcleos. Para jugadores reales, ~50–70 con la VM gratuita de 2 OCPU/12 GB y ~100 con 4 OCPU/24 GB (§3).
 
-**¿Pueden entrar jugadores de Bedrock (móvil, consola)?**
-No con esta configuración. Se podría añadir el plugin Geyser (+ Floodgate) y abrir el puerto UDP 19132, pero queda fuera del alcance de este proyecto.
+**¿Pueden entrar jugadores de Bedrock (móvil, Windows, consola)?**
+Sí: Geyser y Floodgate vienen instalados. Entran por el puerto 19132 con su cuenta de Xbox/Microsoft, sin comprar Java, y juegan en el mismo mundo (§4.7). Las consolas necesitan un truco extra (*BedrockConnect*). No disponible en modo vanilla.
 
 **¿Pueden entrar jugadores con Minecraft no oficial (pirata)?**
 No. Es intencionado: con online-mode desactivado cualquiera podría entrar con el nick del dueño.
@@ -1212,6 +1296,9 @@ No. Es intencionado: con online-mode desactivado cualquiera podría entrar con e
 
 **¿Se pierde el mundo si se reinicia o actualiza?**
 No. El mundo está en `data/`, fuera del contenedor, y hay backups cada 6 h.
+
+**¿Los jugadores de Bedrock cuentan para el límite de jugadores?**
+Sí, `MAX_PLAYERS` cuenta a todos. Cada jugador de Bedrock consume algo más de CPU que uno de Java (Geyser traduce su conexión).
 
 **¿Puedo instalar más plugins?**
 Sí, mientras estén en Modrinth y sean para Paper (§9.10). Cada plugin consume recursos; añade solo lo necesario.

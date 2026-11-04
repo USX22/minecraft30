@@ -26,8 +26,12 @@ services:
     pids_limit: 2048
 
     ports:
-      # ÚNICO puerto expuesto a internet. RCON (25575) NO se publica.
-      - "25565:25565/tcp"
+      # Puertos expuestos a internet. RCON (25575) NO se publica.
+      - "25565:25565/tcp"            # Minecraft Java Edition
+      # Minecraft Bedrock (móvil, Windows, consolas) vía Geyser:
+      - "19132:19132/udp"            # conexión clásica (RakNet)
+      - "19132:19132/tcp"            # "señalización" del método nuevo (NetherNet)
+      - "19133:19133/udp"            # conexión nueva (NetherNet / WebRTC)
 
     environment:
       EULA: "TRUE"
@@ -83,6 +87,14 @@ services:
         viaversion
         viabackwards
       MODRINTH_DOWNLOAD_DEPENDENCIES: required
+      # Soporte para Minecraft BEDROCK (móvil, Windows, consolas), desde el sitio
+      # oficial de GeyserMC (última versión en cada arranque):
+      #  Geyser    -> traduce el protocolo de Bedrock al de Java
+      #  Floodgate -> los jugadores de Bedrock entran con su cuenta de Xbox/
+      #               Microsoft, sin necesitar comprar la edición Java
+      PLUGINS: |-
+        https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
+        https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
 
       # Operación
       STOP_SERVER_ANNOUNCE_DELAY: 30 # avisa en el chat 30 s antes de apagar

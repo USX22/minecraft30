@@ -68,6 +68,31 @@ Los bots ([mineflayer](https://github.com/PrismarineJS/mineflayer)) caminan, cor
 
 **Interpretación:** con 90 jugadores el servidor usó ~30 % del tiempo disponible por tick. Los jugadores reales cargan más (exploran terreno nuevo, granjas, redstone) y los núcleos ARM de Oracle son algo más lentos, por eso la estimación prudente para uso real es **~50–70 jugadores con 2 OCPU** y **~100 con 4 OCPU**, siempre con el mundo pregenerado.
 
+**104 jugadores (4 núcleos, sin límite)**: TPS 14.3–15.8, MSPT 25–31 ms. **No concluyente**: los 4 procesos de bots corrían en los mismos 4 núcleos que el servidor (carga del sistema de 5,4–6,8 con solo 52 bots), así que el servidor no tenía la CPU completa. Para medir 100 jugadores hay que lanzar los bots desde otra máquina.
+
+> Nota: con más de ~50 bots en un solo proceso, el propio proceso se satura y los bots dejan de enviar su posición; el servidor los expulsa por "flotar" (*Flying is not enabled*). Es la protección anti-trampas funcionando. Por eso `bots.js` admite `BOT_START` para repartir los bots en varios procesos.
+
+## Tamaño del mundo (pregeneración con Chunky, 2 núcleos)
+
+| Medida | Valor |
+|---|---|
+| Área pregenerada | 2 × 2 km (radio 1000, 16.129 chunks) |
+| Tiempo | 16 min 45 s (~16 chunks/s) |
+| Disco (mundo normal) | 168 MB |
+| Backup comprimido (zstd) | 110 MB |
+| Estimación para el tamaño por defecto (6 × 6 km) | ~2 h 30 min, ~1,5 GB, ~1 GB por backup |
+
+## Minecraft Bedrock (Geyser + Floodgate)
+
+| Prueba | Resultado | Detalle |
+|---|---|---|
+| Geyser y Floodgate cargan | ✅ | Geyser 2.12.1 (b1288), Floodgate 2.2.5 |
+| Conexión clásica (RakNet, UDP 19132) | ✅ | Responde al *ping* de Bedrock: `MCPE;Servidor de SO y Redes...;40 plazas` |
+| Conexión nueva (NetherNet: señalización TCP 19132 + UDP 19133) | ✅ | Señalización HTTP activa |
+| Autenticación por cuenta de Xbox (Floodgate) | ✅ | `auth-type: floodgate` (parche `config/patches/geyser.json`) |
+| Whitelist de Bedrock (`whitelist.sh bedrock`) | ✅ | Requiere que el jugador haya intentado entrar una vez |
+| Entrar con un cliente Bedrock real | ⏳ | Pendiente para la Fase 2 (Oracle) |
+
 ## Errores encontrados y corregidos durante la prueba
 
 | Problema | Impacto | Corrección |
@@ -80,3 +105,5 @@ Los bots ([mineflayer](https://github.com/PrismarineJS/mineflayer)) caminan, cor
 | `restore.sh` necesitaba `zstd` en la VM; si fallaba dejaba el servidor apagado y sin mundo | Riesgo de pérdida de servicio | Extrae con la imagen de backup y, si algo falla, repone el mundo anterior automáticamente |
 | Los archivos de backup se crean con permisos 666 | Cualquier usuario de la VM podía leerlos/modificarlos | Carpeta `backups/` con permisos 2750 (solo servidor y grupo `mcadmin`) |
 | `run-load-test.sh` leía mal el número de jugadores (códigos de color) | Resultados de carga incorrectos | Se eliminan los códigos de color antes de leer |
+| Geyser publica todas sus versiones como "beta" en Modrinth | Al añadirlo, la elección automática de versión fallaba y el servidor no arrancaba | Geyser y Floodgate se descargan del sitio oficial de GeyserMC |
+| Geyser 2.12 usa por defecto solo el método nuevo (NetherNet) y `auth-type: online` | Clientes con el método clásico no conectarían; los de Bedrock necesitarían cuenta de Java | Parche: `transport: both` y `auth-type: floodgate` |

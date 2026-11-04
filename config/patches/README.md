@@ -4,6 +4,9 @@ La imagen `itzg/minecraft-server` aplica estos archivos JSON **en cada arranque*
 modificando solo las claves indicadas de los YAML que genera Paper. Así la
 configuración queda versionada en git sin sobrescribir el archivo completo.
 
+- `geyser.json`: Bedrock acepta los dos métodos de conexión (RakNet clásico en
+  UDP 19132 y NetherNet nuevo: señalización TCP 19132 + UDP 19133) y los
+  jugadores de Bedrock se autentican con Floodgate (cuenta de Xbox/Microsoft).
 - `paper-world-defaults.json`: activa **anti-xray** (oculta minerales a clientes
   tramposos) y limita entidades por chunk para reducir lag.
 
