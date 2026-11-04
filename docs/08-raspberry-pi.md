@@ -8,20 +8,27 @@ Usa los mismos Docker, scripts, roles, backups y actualizaciones automáticas qu
 |---|---|---|
 | Dónde corre | Centro de datos de Oracle | Tu casa |
 | Cómo entran los jugadores de fuera | IP pública + puerto 25565 | Túnel gratuito de **playit.gg** (sin abrir puertos del router) |
-| Jugadores a la vez | 30+ | **~10–15** (hasta ~20 con el mundo pregenerado) |
+| Jugadores a la vez | 30+ | **Pi 4: ~10–20 · Pi 5: ~20–30** (estimado, con el mundo pregenerado) |
+| Jugadores de Bedrock | IP pública + puerto 19132 | Segundo túnel de playit (UDP), §6 |
 
 ---
 
 ## 1. ¿Cuántos jugadores aguanta?
 
-La Pi 4 tiene 4 núcleos ARM a 1.5–1.8 GHz. Minecraft depende sobre todo de la velocidad de **un** núcleo, y en eso la Pi es unas 2–3 veces más lenta que la VM de Oracle. Lo realista:
+Minecraft depende sobre todo de la velocidad de **un** núcleo.
+- **Pi 4** (Cortex-A72 a 1.5–1.8 GHz): unas 2–3 veces más lenta por núcleo que la VM de Oracle.
+- **Pi 5** (Cortex-A76 a 2.4 GHz): unas 2–3 veces más rápida que la Pi 4, cerca de un núcleo de la VM de Oracle.
 
-| Situación | Jugadores |
-|---|---|
-| Jugando cerca de la base, mundo pregenerado | 15–20 |
-| Varios explorando terreno nuevo, granjas grandes | 8–12 |
+Estimaciones (no medidas en una Pi real; mídelo tú, ver abajo):
 
-Para un servidor de clase suele alcanzar, porque casi nunca se conectan todos a la vez. Mide el rendimiento real con `./scripts/status.sh` (TPS cercano a 20 = bien; por debajo de 15 = lag).
+| Situación | Pi 4 | Pi 5 |
+|---|---|---|
+| Jugando cerca de la base, mundo pregenerado | 15–20 | 25–30 |
+| Varios explorando terreno nuevo, granjas grandes | 8–12 | 15–20 |
+
+**Para 30 jugadores a la vez hace falta una Pi 5 de 8 GB** (con `MAX_PLAYERS=30` en `.env`), mundo pregenerado y, mejor, un SSD. Con una Pi 4, 30 a la vez tendrán lag.
+
+Para un servidor de clase suele alcanzar, porque casi nunca se conectan todos a la vez. Mide el rendimiento real con `./scripts/status.sh` (TPS cercano a 20 = bien; por debajo de 15 = lag) o con la prueba de carga ([06-rendimiento.md](06-rendimiento.md)), lanzando los bots **desde otra computadora** para no quitarle CPU a la Pi.
 
 ## 2. Qué necesitas
 
@@ -145,12 +152,19 @@ La primera vez tarda bastante (10–20 min en la Pi): descarga Java, Paper y los
    - Dirección local: **`127.0.0.1`**, puerto **`25565`**.
 3. Crea el túnel. playit te muestra la dirección pública, por ejemplo `algo.gl.joinmc.link`.
 
+**Túnel para jugadores de Bedrock** (móvil, Windows): crea un segundo túnel:
+   - Tipo: **Minecraft Bedrock (game)** (es UDP).
+   - Dirección local: **`127.0.0.1`**, puerto **`19132`**.
+
+   playit te da una dirección y un **puerto** propios (ej. `algo.gl.at.ply.gg`, puerto `12345`): los jugadores de Bedrock ponen ambos en **Agregar servidor**. Por el túnel funciona el método de conexión clásico (RakNet); el resto (whitelist de Bedrock, nombres `.Gamertag`) es igual que en el [MANUAL §4.7](MANUAL.md#47-entrar-desde-minecraft-bedrock-móvil-windows-consolas).
+
 **Cómo se conecta cada quien:**
 
 | Desde | Dirección en Minecraft |
 |---|---|
-| Fuera de tu casa (compañeros, datos móviles, universidad) | La dirección de playit, ej. `algo.gl.joinmc.link` |
-| Tu misma red de casa | `IP_DE_LA_PI` (ej. `192.168.1.50`), sin túnel y con menos lag |
+| Java, fuera de tu casa (compañeros, datos móviles, universidad) | La dirección de playit, ej. `algo.gl.joinmc.link` |
+| Bedrock, fuera de tu casa | La dirección **y el puerto** del túnel de Bedrock |
+| Tu misma red de casa (Java o Bedrock) | `IP_DE_LA_PI` (ej. `192.168.1.50`), sin túnel y con menos lag |
 
 **Diferencias con Oracle que hay que saber:**
 - Todos los jugadores que entran por el túnel aparecen con la **misma IP** (la del túnel). Por eso **nunca uses `/banip`**: banearía a todos. Banea por nick (`/ban Nick`), como ya indica el [MANUAL §6.4](MANUAL.md#64--no-banear-por-ip).
