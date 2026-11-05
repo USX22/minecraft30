@@ -39,7 +39,7 @@ Pide confirmación (`si`), hace un backup, reinicia el servidor con AuthMe (2–
 
 **Inmediatamente después:**
 1. **El dueño entra** (con cualquier cliente) y escribe en el chat: `/register TuClave TuClave`
-2. Si no ve `[Dueño]` en el chat, en la VM: `./scripts/roles.sh setup`
+2. Después de registrarse, en la VM: `./scripts/roles.sh setup` (el rol de Dueño se asigna a la cuenta no premium cuando ya ha entrado una vez).
 3. Avisa a admins y moderadores para que entren y se registren cuanto antes, y vuelve a darles su rol (`./scripts/roles.sh mod Nick` / `admin Nick`) una vez hayan entrado.
 
 Comprobar el modo actual:
@@ -47,6 +47,8 @@ Comprobar el modo actual:
 ```bash
 ./scripts/no-premium.sh estado
 ```
+
+> **Si al entrar dice "no estás en la whitelist":** `./scripts/no-premium.sh arreglar-whitelist`. El servidor recuerda el identificador oficial de quien ya había entrado antes; el script escribe directamente el identificador correcto del modo no premium (lo mismo hace `whitelist.sh agregar` en este modo).
 
 ## 3. Para los jugadores
 

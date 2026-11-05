@@ -53,7 +53,12 @@ agregar_bedrock() {
 
 case "${1:-}" in
   agregar) shift; [[ $# -gt 0 ]] || die "Falta el jugador"
-           for p in "$@"; do valid_player "$p"; rcon "whitelist add $p"; done ;;
+           if grep -qE '^COMPOSE_FILE=.*nopremium' .env 2>/dev/null; then
+             # Modo no premium: UUID calculado del nombre (ver scripts/no-premium.sh)
+             ./scripts/no-premium.sh agregar "$@"
+           else
+             for p in "$@"; do valid_player "$p"; rcon "whitelist add $p"; done
+           fi ;;
   quitar)  valid_player "${2:-}"; rcon "whitelist remove $2" ;;
   bedrock) agregar_bedrock "$(gamertag "${2:-}")" ;;
   quitar-bedrock) g="$(gamertag "${2:-}")"; CONSOLE_WAIT=3 console_out "fwhitelist remove $g" | grep -vE "STUN|skin api" ;;
