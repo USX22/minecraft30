@@ -205,12 +205,11 @@ y busca el mensaje en el [MANUAL §13](MANUAL.md#13-solución-de-problemas).
 
 ### D4. Entrar desde Bedrock (móvil o Windows)
 1. En Minecraft Bedrock: **Jugar → Servidores → Agregar servidor** → Dirección `IP_PUBLICA`, Puerto `19132` → **Guardar** → entra.
-2. ✅ Te rechaza con un mensaje de whitelist (primer intento: así el servidor conoce tu cuenta).
-3. En la VM:
+2. En la VM ejecuta (si eres nuevo, abre el acceso 3 minutos y espera):
 ```bash
 ./scripts/whitelist.sh bedrock "TuGamertag"
 ```
-4. Vuelve a entrar. ✅ Apareces en el mismo mundo como `.TuGamertag` y desde Java te ven.
+3. Mientras espera, entra desde Bedrock. ✅ El comando dice *"Listo: .TuGamertag ya está en la whitelist"* y apareces en el mismo mundo que los de Java.
 ❌ El servidor no aparece: revisa las reglas de Bedrock de B4 y [MANUAL §13.2](MANUAL.md#132-conexión-de-jugadores).
 
 ---

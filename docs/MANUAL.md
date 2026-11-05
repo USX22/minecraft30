@@ -365,7 +365,7 @@ No destruyas ni robes construcciones ajenas, no uses hacks (x-ray, fly, kill-aur
 Requisitos: Minecraft Bedrock comprado y una **cuenta de Xbox/Microsoft** (gratuita). No hace falta comprar la edición Java.
 
 1. Envía tu **gamertag** exacto a un administrador (aparece en la pantalla principal de Minecraft, arriba a la derecha).
-2. **Intenta entrar una vez** (pasos 3–5). Te rechazará con un mensaje de whitelist: es normal, así el servidor conoce tu cuenta. Avisa al administrador para que te añada (§9.4) y vuelve a entrar.
+2. El administrador ejecuta `./scripts/whitelist.sh bedrock "TuGamertag"` (§9.4). Si eres nuevo, el comando abre el acceso **3 minutos**: entra en ese momento (pasos 3–5) y quedarás agregado para siempre.
 3. **Jugar → Servidores → Agregar servidor** (al final de la lista de servidores).
 4. **Nombre:** el que quieras. **Dirección:** `IP_PUBLICA` (o el dominio). **Puerto:** `19132`.
 5. **Guardar** y pulsa el servidor para entrar.
@@ -827,7 +827,7 @@ La consola tiene **todos** los permisos (como el dueño).
 
 Para dar acceso a toda la clase de una vez, pasa todos los nicks separados por espacios. Los nicks se validan (3–16 caracteres: letras, números y `_`).
 
-**Jugadores de Bedrock** (por gamertag, entre comillas si tiene espacios). El jugador debe haber **intentado entrar una vez** antes (si no, Floodgate responde *"Unable to find user in our cache"*):
+**Jugadores de Bedrock** (por gamertag, entre comillas si tiene espacios). Si el jugador es nuevo, Floodgate todavía no conoce su cuenta (*"Unable to find user in our cache"*); entonces el comando **abre la whitelist hasta 3 minutos**, espera a que el jugador entre desde Bedrock, lo agrega con su nombre exacto (`.Gamertag`) y la **vuelve a cerrar automáticamente**. Coordínate con el jugador para que entre mientras el comando espera:
 
 ```bash
 ./scripts/whitelist.sh bedrock "Gamertag Del Jugador"
@@ -1141,7 +1141,8 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 | *Failed to verify username* | Problema de sesión del jugador o caída de los servidores de Microsoft. Si les pasa a todos a la vez, espera. |
 | *Incompatible client* | §4.3. |
 | Bedrock: el servidor no aparece / *Unable to connect to world* | 1) Reglas UDP 19132, TCP 19132 y UDP 19133 en la Security List (§8.5). 2) En la VM: `sudo iptables -L INPUT -n` debe incluir esos puertos (si no, repite `bootstrap-host.sh`). 3) `docker compose logs mc \| grep -i geyser` debe mostrar *Started Geyser on UDP port 19132*. |
-| Bedrock: *You are not whitelisted* | `./scripts/whitelist.sh bedrock "Gamertag"` (después de un primer intento de entrar). |
+| Bedrock: *You are not whitelisted* | `./scripts/whitelist.sh bedrock "Gamertag"` y que el jugador entre mientras el comando espera (3 min). |
+| Bedrock: el indicador de la lista dice "ping alto / mala conexión" pero se puede jugar | Es habitual con servidores Geyser (la respuesta pasa por la traducción). Si dentro del juego los bloques responden bien, ignóralo. |
 
 ### 13.3 Rendimiento (lag)
 
