@@ -940,24 +940,9 @@ Hay dos formas:
 git pull && docker compose up -d
 ```
 
-**B) Solo en esta VM**, sin tocar archivos versionados, con `docker-compose.override.yml` (está en `.gitignore`, así `git pull` nunca choca). Ejemplo, añadir un plugin (hay que repetir la lista completa):
+**B) Solo en esta VM**, sin tocar archivos versionados: `docker-compose.override.yml` (está en `.gitignore`, así `git pull` nunca choca) para puertos u otros ajustes de Docker, y `.env` para la configuración. Si usas `COMPOSE_FILE` en `.env` (modos vanilla o no premium), añade `:docker-compose.override.yml` al final, porque en ese caso Compose no lo carga solo.
 
-```yaml
-services:
-  mc:
-    environment:
-      MODRINTH_PROJECTS: |-
-        luckperms
-        essentialsx
-        coreprotect
-        chunky
-        lpc-chat
-        viaversion
-        viabackwards
-        nombre-del-plugin-en-modrinth
-```
-
-Luego `docker compose up -d`. Si usas el modo vanilla (`COMPOSE_FILE` en `.env`), añade `:docker-compose.override.yml` al final de `COMPOSE_FILE`, porque en ese caso Compose no lo carga automáticamente.
+**Añadir plugins:** no hace falta editar nada a mano. `./scripts/plugins.sh buscar <texto>` y `./scripts/plugins.sh agregar <slug>` comprueban que el plugin sea compatible, lo guardan en `EXTRA_PLUGINS` de `.env` y reinician. Guía completa (plugins recomendados, datapacks, mods, bot de Discord): [docs/11-mods-plugins-y-bots.md](11-mods-plugins-y-bots.md).
 
 **Archivos de configuración de plugins** (EssentialsX, CoreProtect...) están en `data/plugins/<Plugin>/`. Edítalos con sudo, porque pertenecen al usuario del contenedor: `sudo nano data/plugins/Essentials/config.yml`, y recarga (`/essentials reload`) o reinicia.
 
@@ -1202,6 +1187,7 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 | `SERVER_OWNER` | — | Nick del dueño: único OP y grupo `owner` |
 | `WHITELIST` | — | Nicks iniciales de la whitelist (separados por comas) |
 | `RCON_PASSWORD` | aleatoria | Contraseña de la consola remota interna |
+| `EXTRA_PLUGINS` | (vacío) | Plugins adicionales de Modrinth, separados por comas (`scripts/plugins.sh`) |
 | `BACKUP_INTERVAL` | `6h` | Frecuencia de backups (`30m`, `6h`, `1d`) |
 | `PRUNE_BACKUPS_DAYS` | `7` | Días que se guardan los backups |
 
@@ -1222,6 +1208,8 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 | `scripts/no-premium.sh` | admin. de sistema | `activar` / `desactivar` / `estado` del modo para clientes no oficiales |
 | `scripts/prueba-carga.sh` | admin. de sistema | `activar [N]` / `desactivar` el modo prueba para bots remotos |
 | `scripts/monitor.sh` | admin. de sistema | Mide jugadores, TPS, CPU y RAM cada 30 s a un CSV |
+| `scripts/plugins.sh` | admin. de sistema | `buscar` / `agregar` / `quitar` / `lista` plugins adicionales de Modrinth |
+| `scripts/discord.sh` | admin. de sistema | `configurar` / `estado` / `quitar` el bot de Discord (DiscordSRV) |
 | `scripts/azure-abrir-puertos.sh` | Cloud Shell de Azure | Crea el firewall de Azure y abre los puertos del juego |
 | `scripts/firewall.sh` | root (systemd) | Reglas anti-flood |
 | `scripts/lib.sh` | — | Funciones comunes (no se ejecuta directamente) |
@@ -1327,8 +1315,14 @@ No. El mundo está en `data/`, fuera del contenedor, y hay backups cada 6 h.
 **¿Los jugadores de Bedrock cuentan para el límite de jugadores?**
 Sí, `MAX_PLAYERS` cuenta a todos. Cada jugador de Bedrock consume algo más de CPU que uno de Java (Geyser traduce su conexión).
 
+**¿Puedo instalar más plugins? ¿Y mods?**
+Plugins sí: `./scripts/plugins.sh agregar <slug>` (§9.10). Datapacks también. Mods de Forge/Fabric no en este servidor (Paper): explicación y alternativas en [docs/11](11-mods-plugins-y-bots.md).
+
+**¿Se puede administrar desde Discord?**
+Sí, con un bot (DiscordSRV): canal de consola privado para admins y chat unido al juego. `./scripts/discord.sh configurar ...` ([docs/11 §4](11-mods-plugins-y-bots.md)).
+
 **¿Puedo instalar más plugins?**
-Sí, mientras estén en Modrinth y sean para Paper (§9.10). Cada plugin consume recursos; añade solo lo necesario.
+Ver la pregunta anterior.
 
 **¿Por qué no dar OP a los moderadores?**
 Porque OP permite todo, incluido dar OP a otros. Los roles de LuckPerms aplican el principio de mínimo privilegio (§1.4).

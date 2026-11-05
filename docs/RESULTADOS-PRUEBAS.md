@@ -134,6 +134,15 @@ Máquina **Standard_B2pls_v2** (2 vCPU ARM Ampere, 4 GB), Ubuntu 24.04, **North 
 
 `tests/load/authme-test.js` en el servidor de pruebas: **5/5** (pide registro, sin sesión no puede hablar, `/register`, contraseña incorrecta expulsa, correcta entra). Se detectaron y corrigieron dos valores por defecto de AuthMe que habrían roto el servidor en una clase: **1 registro por IP** (toda la clase comparte IP) y nombres sin punto (los de Bedrock). Además, sus ventanas de registro no funcionan en Bedrock ni en clientes antiguos: se usan los comandos del chat.
 
+## Plugins adicionales y bot de Discord
+
+| Prueba | Resultado |
+|---|---|
+| `plugins.sh agregar worldedit` | ✅ Instalado y cargado; la versión elegida siguió en 26.1.2 |
+| `plugins.sh agregar no-existe-xyz` | ✅ Rechazado sin tocar nada |
+| `plugins.sh quitar discordsrv` | ✅ Eliminado; su configuración se conserva |
+| `discord.sh configurar` con token falso | ✅ Configuración escrita; DiscordSRV informa "token inválido" y el servidor sigue *healthy* |
+
 ## Errores encontrados y corregidos durante la prueba
 
 | Problema | Impacto | Corrección |

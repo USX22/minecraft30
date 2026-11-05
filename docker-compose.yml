@@ -75,6 +75,7 @@ services:
       #  chunky      -> pregeneración del mundo (evita lag al explorar)
       #  (spark, para diagnosticar lag, ya viene incluido dentro de Paper)
       #  lpc-chat    -> muestra en el chat el prefijo del rol ([Mod], [Admin]...)
+      #  EXTRA_PLUGINS (en .env) -> plugins adicionales, con ./scripts/plugins.sh
       #  viaversion + viabackwards -> permiten entrar con el Minecraft Java
       #               OFICIAL aunque la versión del jugador no coincida
       #               exactamente con la del servidor
@@ -86,6 +87,7 @@ services:
         lpc-chat
         viaversion
         viabackwards
+        ${EXTRA_PLUGINS:-}
       MODRINTH_DOWNLOAD_DEPENDENCIES: required
       # Soporte para Minecraft BEDROCK (móvil, Windows, consolas), desde el sitio
       # oficial de GeyserMC (última versión en cada arranque):
