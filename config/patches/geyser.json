@@ -1,9 +1,37 @@
 {
   "file": "/data/plugins/Geyser-Spigot/config.yml",
   "ops": [
-    { "$set": { "path": "$.bedrock.transport", "value": "both" } },
-    { "$set": { "path": "$.bedrock.port", "value": 19132, "value-type": "int" } },
-    { "$set": { "path": "$.bedrock.webrtc-port", "value": 19133, "value-type": "int" } },
-    { "$set": { "path": "$.java.auth-type", "value": "floodgate" } }
+    {
+      "$set": {
+        "path": "$.bedrock.transport",
+        "value": "both"
+      }
+    },
+    {
+      "$set": {
+        "path": "$.bedrock.port",
+        "value": 19132,
+        "value-type": "int"
+      }
+    },
+    {
+      "$set": {
+        "path": "$.bedrock.webrtc-port",
+        "value": 19133,
+        "value-type": "int"
+      }
+    },
+    {
+      "$set": {
+        "path": "$.java.auth-type",
+        "value": "floodgate"
+      }
+    },
+    {
+      "$set": {
+        "path": "$.motd.secondary-motd",
+        "value": "Survival"
+      }
+    }
   ]
 }
