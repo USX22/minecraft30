@@ -25,6 +25,21 @@ jobs:
           cp .env.raspberrypi.example .env
           docker compose config -q
 
+      - name: Modo no premium sincronizado con la lista de plugins
+        run: |
+          cp .env.example .env
+          docker compose -f docker-compose.yml -f docker-compose.nopremium.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.prueba.yml config -q
+          python3 - <<'EOF'
+          import re
+          lista = lambda f: set(re.search(r"MODRINTH_PROJECTS: \|-\n((?:\s+\S+\n)+)", open(f).read()).group(1).split())
+          base, np_ = lista("docker-compose.yml"), lista("docker-compose.nopremium.yml")
+          falta = base - np_
+          assert not falta, f"docker-compose.nopremium.yml no tiene: {falta}"
+          assert "authmereloaded" in np_
+          print("OK", sorted(np_))
+          EOF
+
       - name: ShellCheck
         run: shellcheck -x scripts/*.sh tests/load/*.sh
 

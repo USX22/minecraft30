@@ -184,7 +184,7 @@ y busca el mensaje en el [MANUAL §13](MANUAL.md#13-solución-de-problemas).
 ## Parte D — Primera conexión como jugador (5 min)
 
 ### D1. Entrar
-1. Abre el **launcher oficial** de Minecraft → **Jugar** (Java Edition).
+1. Abre el **launcher oficial** de Minecraft → **Java Edition**. En la lista junto al botón **Jugar** elige **"Última versión"** (no una instalación antigua o con mods como Fabric). Tu nick de Java es el que aparece junto a ese botón.
 2. **Multijugador → Agregar servidor** → Dirección: `IP_PUBLICA` → **Listo** → **Unirse**.
 
 ✅ Entras al mundo. Escribe `hola` en el chat: tu nombre aparece como **`[Dueño] TuNick`** (en dorado).

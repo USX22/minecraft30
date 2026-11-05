@@ -79,6 +79,8 @@ Hay **cinco tipos de personas** con distintos niveles de acceso. Lee las seccion
 | **Lag** | Retraso. Puede ser de **red** (ping alto, culpa de la conexión) o de **servidor** (TPS bajo, el servidor no da abasto). |
 | **Ping / latencia** | Tiempo que tarda un paquete en ir y volver del servidor, en milisegundos. < 100 ms es bueno. |
 | **Griefing** | Destruir o robar construcciones ajenas a propósito. |
+| **MOTD** | *Message of the day*: la descripción que aparece bajo el nombre del servidor en la lista de servidores. Se cambia con `MOTD` en `.env` (§9.15). |
+| **Cliente no oficial / "no premium"** | Minecraft Java sin cuenta comprada (ej. TLauncher). Solo puede entrar si se activa el modo opcional de [docs/10](10-clientes-no-oficiales.md). |
 | **EULA** | Acuerdo de licencia de Mojang que el dueño del servidor acepta (`EULA: TRUE`). Prohíbe, entre otras cosas, vender ventajas de juego. |
 
 ### 1.2 Redes
@@ -1007,6 +1009,21 @@ sudo sed -i '0,/^-A INPUT .*REJECT/s||-A INPUT -p tcp -m state --state NEW -m tc
 - Reinicio: `sudo reboot` (el servidor vuelve solo).
 - Apagado: desde la consola de Oracle (**Stop**). Ojo: una VM parada mucho tiempo con cuenta solo *Free* puede ser recuperada por Oracle.
 
+
+### 9.15 Cambiar la descripción del servidor (MOTD)
+
+La descripción que ven los jugadores en la lista de servidores está en `MOTD` de `.env`. Los códigos `§` dan color: `§6` dorado, `§a` verde, `§e` amarillo, `§b` celeste, `§c` rojo, `§7` gris, `§f` blanco, `§l` negrita.
+
+```bash
+sed -i 's|^MOTD=.*|MOTD=§6Servidor para BUAP §7- §aSurvival|' .env && docker compose up -d mc
+```
+
+En Bedrock, la primera línea es esta misma descripción y la segunda dice "Survival" (`config/patches/geyser.json`).
+
+### 9.16 Activar el modo para clientes no oficiales (opcional)
+
+Ver [docs/10-clientes-no-oficiales.md](10-clientes-no-oficiales.md): `./scripts/no-premium.sh activar | desactivar | estado`.
+
 ---
 
 ## 10. Mantenimiento programado
@@ -1202,6 +1219,10 @@ Vuelve a poner el `#` delante de `COMPOSE_FILE` y `docker compose up -d`. Paper 
 | `scripts/restore.sh` | admin. de sistema (usa sudo) | Restaurar backup |
 | `scripts/update.sh` | automático / manual | Actualización segura (`--ahora` sin aviso) |
 | `scripts/sysadmins.sh` | sudo | `agregar` / `quitar` / `lista` administradores de sistema |
+| `scripts/no-premium.sh` | admin. de sistema | `activar` / `desactivar` / `estado` del modo para clientes no oficiales |
+| `scripts/prueba-carga.sh` | admin. de sistema | `activar [N]` / `desactivar` el modo prueba para bots remotos |
+| `scripts/monitor.sh` | admin. de sistema | Mide jugadores, TPS, CPU y RAM cada 30 s a un CSV |
+| `scripts/azure-abrir-puertos.sh` | Cloud Shell de Azure | Crea el firewall de Azure y abre los puertos del juego |
 | `scripts/firewall.sh` | root (systemd) | Reglas anti-flood |
 | `scripts/lib.sh` | — | Funciones comunes (no se ejecuta directamente) |
 | `tests/load/run-load-test.sh` | admin. de sistema | Prueba de carga con bots |
@@ -1291,8 +1312,11 @@ En la prueba real, 90 bots con 20 TPS usando 2 núcleos. Para jugadores reales, 
 **¿Pueden entrar jugadores de Bedrock (móvil, Windows, consola)?**
 Sí: Geyser y Floodgate vienen instalados. Entran por el puerto 19132 con su cuenta de Xbox/Microsoft, sin comprar Java, y juegan en el mismo mundo (§4.7). Las consolas necesitan un truco extra (*BedrockConnect*). No disponible en modo vanilla.
 
-**¿Pueden entrar jugadores con Minecraft no oficial (pirata)?**
-No. Es intencionado: con online-mode desactivado cualquiera podría entrar con el nick del dueño.
+**¿Pueden entrar jugadores con Minecraft no oficial ("no premium")?**
+Por defecto no: sin la verificación de Microsoft cualquiera podría entrar con el nick del dueño. Hay un **modo opcional** que lo permite de forma segura (cada jugador protege su nombre con contraseña, plugin AuthMe): `./scripts/no-premium.sh activar`. Lee antes [docs/10-clientes-no-oficiales.md](10-clientes-no-oficiales.md) (riesgos, términos de Mojang y cómo afecta a roles e inventarios).
+
+**¿Los de Java y los de Bedrock juegan juntos?**
+Sí: es **un solo servidor y un solo mundo**. Solo cambia la "puerta": Java entra por el puerto 25565 y Bedrock por el 19132, donde Geyser traduce su protocolo al de Java (§2.2).
 
 **¿Cuánto cuesta?**
 0 $ con Oracle Always Free. Ver [07-alternativas-y-costos.md](07-alternativas-y-costos.md).

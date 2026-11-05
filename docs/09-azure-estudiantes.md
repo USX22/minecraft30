@@ -16,134 +16,168 @@ Si Oracle no acepta tu tarjeta, **Azure for Students** da **100 $ de crédito al
 
 ## 1. ¿Qué máquina y cuánto cuesta?
 
-Precios reales de la API de Azure (noviembre de 2026, Linux, pago por uso). Al mes (730 h) se suman ~5 $ de disco y ~3,65 $ de IP pública:
+Costo real de la instalación hecha para este proyecto (región **North Central US**, precios de la API de Azure, noviembre de 2026):
 
-| Tamaño | CPU | RAM | $/hora (East US 2) | ≈ $/mes total | Con 100 $ dura |
-|---|---|---|---|---|---|
-| **Standard_B2pls_v2** (recomendada) | 2 vCPU ARM (Ampere) | 4 GB | 0,0336 | **~33 $** | **~3 meses** |
-| Standard_B2als_v2 (si la ARM no está disponible) | 2 vCPU AMD | 4 GB | 0,041–0,047 | ~40 $ | ~2,5 meses |
-| Standard_B2ps_v2 | 2 vCPU ARM | 8 GB | 0,0672 | ~58 $ | ~1,7 meses |
+| Concepto | $/mes |
+|---|---|
+| Máquina **Standard_B2pls_v2** (2 vCPU ARM Ampere, 4 GB) — 0,0336 $/h | 24,53 |
+| Disco **SSD estándar 64 GiB** (E6) | 4,80 |
+| IP pública estándar | 3,65 |
+| **Total** | **≈ 33 $ → los 100 $ duran ~3 meses encendida 24/7** |
 
-El precio cambia según la región (East US 2 suele ser de las más baratas). Puedes comprobarlo en <https://azure.microsoft.com/pricing/calculator/>.
+Otras opciones (si la ARM no está disponible en tu región): Standard_B2als_v2 (2 vCPU AMD, 4 GB, ~27–40 $/mes según región); con 8 GB, Standard_B2ps_v2 (~49 $/mes solo la máquina). El disco *SSD prémium* costaría 10,21 $/mes: no hace falta.
 
-**¿Alcanzan 4 GB para 30 jugadores?** Sí, lo medimos: con la configuración de 4 GB (`MC_MEMORY=2304M`, `CONTAINER_MEM_LIMIT=3300m`) y 2 núcleos, **36 jugadores (bots) se mantuvieron a 20 TPS** durante la prueba y la memoria estable en 2,9 GB ([RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md)). Con 2,75 GB de *heap* el sistema mató el proceso por falta de memoria: Java necesita ~0,7–0,8 GB **además** del heap. No subas `MC_MEMORY` en una máquina de 4 GB.
+**¿Alcanzan 4 GB para 30 jugadores?** Sí, lo medimos: con la configuración de 4 GB (`MC_MEMORY=2304M`, `CONTAINER_MEM_LIMIT=3300m`) y 2 núcleos, **36 jugadores (bots) se mantuvieron a 20 TPS** y la memoria estable en 2,9 GB ([RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md)). Con 2,75 GB de *heap* el sistema mató el proceso por falta de memoria: Java necesita ~0,7–0,8 GB **además** del heap. No subas `MC_MEMORY` en una máquina de 4 GB.
 
-**CPU con créditos (máquinas "B"):** la B2pls_v2 garantiza el 30 % de sus 2 núcleos y acumula créditos cuando usa menos (hasta 864). El servidor vacío usa ~6 % (acumula) y con 36 jugadores ~40 % (gasta ~12 créditos/hora): aguanta jornadas largas de juego sin frenarse. Puedes verlo en el portal: máquina → **Métricas** → *CPU Credits Remaining*.
+**CPU con créditos (máquinas "B"):** la B2pls_v2 garantiza el 30 % de sus 2 núcleos y acumula créditos cuando usa menos (hasta 864). El servidor vacío usa ~6 % (acumula) y con 36 jugadores ~40 % (gasta ~12 créditos/hora): aguanta jornadas largas de juego sin frenarse. Una máquina **recién creada tiene pocos créditos**: la pregeneración del mundo los gasta y luego sigue más lenta (§7). Se ve en el portal: máquina → **Métricas** → *CPU Credits Remaining*.
 
 ## 2. Activar Azure for Students
 
 1. Entra en <https://azure.microsoft.com/free/students>.
-2. Pulsa **Start free** / **Activar ahora** e inicia sesión (o crea una cuenta de Microsoft) con tu **correo institucional**.
-3. Verifica tu identidad (teléfono) y tu condición de estudiante (correo de la universidad). **No pide tarjeta.**
-4. Al terminar tendrás una suscripción llamada **Azure for Students** con 100 $ de crédito. El saldo se ve en <https://portal.azure.com> → buscar **Education** → *Overview*.
+2. Pulsa **Start free** / **Activar ahora** e inicia sesión con tu **correo institucional**.
+3. Verifica tu identidad (teléfono) y tu condición de estudiante. **No pide tarjeta.**
+4. Tendrás una suscripción **Azure for Students** con **100 $ de crédito válido 1 año** (renovable mientras seas estudiante). El saldo se ve en <https://portal.azure.com> → buscar **Education** → *Información general*.
 
-> Microsoft da **una** oferta por estudiante. Si tienes dos correos institucionales, usa uno; el otro solo te sirve si el primero no se puede verificar.
+> Microsoft da **una** oferta por estudiante. Si tienes dos correos institucionales, usa uno.
 
-## 3. Ver en qué regiones puedes crear máquinas
+## 3. Preparar la suscripción (una sola vez)
 
-Las suscripciones de estudiante solo pueden usar **unas 5 regiones**, distintas para cada persona.
-1. En el portal, busca **Directiva** (*Policy*) → en el menú izquierdo abre **Creación** → **Tareas** (en el portal en español, *Assignments* aparece traducido como "Tareas").
+### 3.1 Ver en qué regiones puedes crear máquinas
+
+Las suscripciones de estudiante solo pueden usar **unas 5 regiones**, distintas para cada persona. **La lista desplegable del formulario muestra todas las regiones del mundo**, pero si eliges una no permitida (por ejemplo *Mexico Central*) Azure la rechaza al final.
+1. En el portal, busca **Directiva** → menú izquierdo → **Creación** → **Tareas** (en español, *Assignments* aparece traducido como "Tareas").
 2. Abre *Allowed resource deployment regions* → pestaña **Parámetros**: el valor de `listOfAllowedLocations` es tu lista.
-3. Elige la más cercana a los jugadores (menos ping) **en la que exista la máquina** (§1). Ejemplo real de una cuenta de la BUAP: la lista era `norwayeast, northcentralus, westus, chilecentral, belgiumcentral`, y la mejor opción fue **North Central US** (B2pls_v2 a 0,0336 $/h, la más barata; ~60–70 ms de ping desde el centro de México). Chile, Noruega y Bélgica no tenían la máquina ARM.
+3. Elige la más cercana a los jugadores **en la que exista la máquina**. Ejemplo real (cuenta de la BUAP): la lista era `norwayeast, northcentralus, westus, chilecentral, belgiumcentral` y la mejor fue **North Central US** (Chicago): la más barata y ~60–100 ms de ping desde el centro de México. Ojo: **North Central US** y **Central US** son regiones distintas.
+
+### 3.2 Activar los servicios de máquinas virtuales y redes
+
+En una suscripción nueva, los servicios de máquinas virtuales (`Microsoft.Compute`) y de redes (`Microsoft.Network`) vienen **sin registrar**. Síntoma: al elegir el tamaño, **todos** salen *"NotAvailableForSubscription"*. Se arregla una vez desde la **Cloud Shell** del portal (icono `>_` arriba a la derecha → **Bash** → "No se requiere una cuenta de almacenamiento"):
+
+```bash
+az provider register -n Microsoft.Compute --wait && az provider register -n Microsoft.Network --wait && echo LISTO
+```
+
+Tarda 1–5 minutos. Comprueba los tamaños disponibles y tu cuota en tus regiones:
+
+```bash
+for r in northcentralus westus; do echo "== $r"; az vm list-skus -l $r --resource-type virtualMachines --query '[?length(restrictions)==`0` && starts_with(name, `Standard_B2`)].name' -o tsv | tr '\n' ' '; echo; done; az vm list-usage -l northcentralus -o table | grep -iE "bps|Total Regional vCPUs"
+```
+
+(Cambia las regiones por las tuyas.) Debe aparecer `Standard_B2pls_v2` y la fila *Standard Bpsv2 Family vCPUs* con límite ≥ 2.
 
 ## 4. Crear la máquina virtual
 
-Necesitas tu llave SSH pública (Parte A del [TUTORIAL](TUTORIAL.md#parte-a--preparación-en-tu-computadora-10-min)).
+Portal → **Máquinas virtuales** → **Crear** → **Máquina virtual de Azure**. **Rellena en este orden** (el orden importa: los tamaños ARM solo aparecen tras elegir la arquitectura):
 
-Portal → **Virtual machines** → **Create** → **Azure virtual machine**:
-
-**Pestaña Basics**
+**Pestaña Datos básicos**
 
 | Campo | Valor |
 |---|---|
-| Subscription | Azure for Students |
-| Resource group | **Create new** → `minecraft30` |
-| Virtual machine name | `minecraft30` |
-| Region | Una de tus regiones permitidas (§3) |
-| Availability options | No infrastructure redundancy required |
-| Security type | Standard (o Trusted launch, cualquiera) |
-| Image | **Ubuntu Server 24.04 LTS – Arm64** (para B2pls_v2). Si usas B2als_v2, la versión **x64** |
-| Size | **See all sizes** → busca `B2pls_v2` → **Standard_B2pls_v2**. Si sale *Not available for subscription*, prueba `B2als_v2` (y cambia la imagen a x64) u otra región |
-| Authentication type | **SSH public key** |
-| Username | `azureuser` (o el que quieras) |
-| SSH public key source | **Use existing public key** → pega la línea `ssh-ed25519 AAAA...` |
-| Public inbound ports | **Allow selected ports** → **SSH (22)** |
+| Suscripción | Azure for Students |
+| Grupo de recursos | **Crear nuevo** → `minecraft30` |
+| Nombre de la máquina virtual | `minecraft30` |
+| Región | **(US) North Central US** (o la tuya de §3.1) |
+| Opciones de disponibilidad | **No se requiere redundancia de la infraestructura** (con "zona de disponibilidad" a veces no salen los tamaños baratos) |
+| Tipo de seguridad | Estándar |
+| VM architecture | **Arm64** (antes de elegir tamaño) |
+| Image | **Ubuntu Server 24.04 LTS – Arm64** |
+| Tamaño | **Ver todos los tamaños** → busca `B2pls` → **Standard_B2pls_v2** (24,53 US$/mes) → Seleccionar |
+| Tipo de autenticación | **Clave pública SSH** |
+| Nombre de usuario | `azureuser` |
+| Origen de clave pública SSH | **Generar un par de claves nuevo**, formato **Ed25519**, nombre `minecraft30_key` (o "Usar clave pública existente" si ya tienes una) |
+| Puertos de entrada públicos | **Permitir puertos seleccionados** → **SSH (22)** (el aviso amarillo es normal: `bootstrap-host.sh` deja SSH solo con llave y con fail2ban) |
 
-**Pestaña Disks:** OS disk type → **Standard SSD** (más barato que Premium); tamaño **64 GiB**; marca *Delete with VM*.
+**Pestaña Discos:** el formulario propone **30 GiB** y **SSD prémium**: cámbialos a **64 GiB** y **SSD estándar** (30 GiB no alcanzan para el mundo y 7 días de backups; prémium cuesta el doble). Deja *Eliminar con VM* marcado.
 
-**Pestaña Networking:** deja la red nueva y una **Public IP** nueva (Standard). NIC network security group: **Basic**, puertos públicos: SSH.
+**Pestaña Redes:** marca **Eliminar IP pública y NIC cuando se elimine la VM** (si no, la IP seguiría cobrando si borras la máquina). Si te deja, pon *Grupo de seguridad de red de NIC*: **Básico**; si el resumen final dice "Grupo de seguridad de red de NIC: –", no pasa nada, se resuelve en §5.
 
-**Pestaña Management:** comprueba que **Auto-shutdown** esté **desactivado** (si no, el servidor se apagaría cada noche).
+**Pestaña Administración:** **Apagado automático desactivado**. Lo demás como viene.
 
-**Review + create** → **Create**. En 1–2 minutos la máquina está lista. En su página, copia la **Public IP address**: es tu `IP_PUBLICA`.
-
-> Opcional: en la IP pública → **Configuration** → **Static**, para que no cambie si apagas la máquina.
+**Revisar y crear** → comprueba el resumen (ARM64, B2pls_v2, 64 GiB StandardSSD_LRS, apagado automático desactivado) → **Crear** → **Descargar la clave privada y crear el recurso**. El archivo `minecraft30_key.pem` **solo se puede descargar esa vez**: guárdalo en `C:\Users\TuUsuario\.ssh\` y no lo compartas. El teléfono que aparece en "Términos" lo toma Azure de la cuenta institucional; no afecta.
 
 ## 5. Abrir los puertos del juego (para cualquier IP)
 
-Máquina → **Networking** (o *Network settings*) → **Create port rule** → **Inbound port rule**. Crea estas 4 reglas (Source: **Any**, Action: **Allow**):
+Cuando termine la implementación, abre la **Cloud Shell** (`>_`, Bash) y ejecuta el script del proyecto. Crea el firewall de Azure (NSG) si el formulario no lo creó, abre **solo** SSH 22, Java 25565 TCP, Bedrock 19132 UDP/TCP y 19133 UDP, revisa también el firewall de la subred y muestra la **IP pública**:
 
-| Destination port ranges | Protocol | Name |
-|---|---|---|
-| 25565 | TCP | Minecraft-Java |
-| 19132 | UDP | Bedrock-RakNet |
-| 19132 | TCP | Bedrock-senalizacion |
-| 19133 | UDP | Bedrock-NetherNet |
+```bash
+curl -sL https://raw.githubusercontent.com/usx22/minecraft30/claude/eager-newton-q1uimf/scripts/azure-abrir-puertos.sh | bash
+```
 
-**No abras el 25575** (RCON).
+Si tus nombres son distintos: `curl -sL ... | RG=migrupo VM=mimaquina bash`. **No abras el 25575** (RCON).
 
 ## 6. Instalar el servidor
 
-Igual que en Oracle, con el usuario de Azure. Desde tu computadora:
+### 6.1 Entrar desde Windows
 
-```bash
-ssh azureuser@IP_PUBLICA
+En **PowerShell** (si guardaste la llave en `.ssh`), deja la llave legible solo por tu usuario (si no, SSH se niega a usarla):
+
+```powershell
+icacls "$env:USERPROFILE\.ssh\minecraft30_key.pem" /inheritance:r /grant:r "${env:USERNAME}:R"
 ```
 
-En la máquina:
+```powershell
+ssh -i "$env:USERPROFILE\.ssh\minecraft30_key.pem" azureuser@IP_PUBLICA
+```
+
+La primera vez responde `yes`. Ojo: `$env:USERPROFILE` y `$env:USERNAME` se escriben **tal cual** (son variables de Windows). Si `Move-Item`/`icacls` no encuentra el archivo, búscalo con `Get-ChildItem "$env:USERPROFILE" -Recurse -Filter "*minecraft30*"`.
+
+### 6.2 Descargar y preparar
 
 ```bash
 sudo git clone https://github.com/usx22/minecraft30.git /opt/minecraft30 && sudo chown -R "$USER": /opt/minecraft30
 ```
 
+(Mientras el proyecto no esté en la rama `main`, añade `-b claude/eager-newton-q1uimf` después de `clone`.)
+
 ```bash
 cd /opt/minecraft30 && sudo ./scripts/bootstrap-host.sh
 ```
 
-`bootstrap-host.sh` instala Docker, endurece SSH, configura el firewall (UFW) con los puertos de Java y Bedrock, fail2ban, 4 GB de swap y los servicios. Sal y vuelve a entrar:
+Tarda 5–10 minutos. Para que cada vez que entres por SSH estés ya en la carpeta del proyecto (si no, los `./scripts/...` dan *"No such file or directory"*):
 
 ```bash
-exit
+echo 'cd /opt/minecraft30' >> ~/.bashrc
 ```
 
-```bash
-ssh azureuser@IP_PUBLICA
-```
+Sal (`exit`) y vuelve a entrar (flecha ↑ en PowerShell repite el `ssh`).
 
-```bash
-cd /opt/minecraft30 && ./scripts/install.sh
-```
-
-La primera vez crea `.env`. Edítalo:
-
-```bash
-nano .env
-```
-
-- `SERVER_OWNER=` y `WHITELIST=` → tu nick y los de tus compañeros.
-- `TZ=` → tu zona horaria.
-- **Memoria para la máquina de 4 GB (importante):**
-  - `MC_MEMORY=2304M`
-  - `CONTAINER_MEM_LIMIT=3300m`
-- `MAX_PLAYERS=36` (lo que se midió con 4 GB; con la de 8 GB puedes dejar 40 y usar `MC_MEMORY=6G` / `CONTAINER_MEM_LIMIT=7g`).
-
-Guarda (`Ctrl+O`, `Enter`, `Ctrl+X`) y ejecuta otra vez:
+### 6.3 Configurar e instalar
 
 ```bash
 ./scripts/install.sh
 ```
 
-A partir de aquí todo es igual que en el [TUTORIAL](TUTORIAL.md) (partes D a L): primera conexión, roles, pruebas, pregeneración (en esta máquina el radio 3000 tarda ~2–3 h) y backups.
+La primera vez solo crea `.env`. **Tu nick de Java** es el que aparece en el launcher **junto al botón Jugar**; el nombre de arriba a la izquierda es tu cuenta de Microsoft/Xbox (tu gamertag de Bedrock). Configura todo de una vez (cambia `TU_NICK` las dos veces):
+
+```bash
+sed -i -e 's/^SERVER_OWNER=.*/SERVER_OWNER=TU_NICK/' -e 's/^WHITELIST=.*/WHITELIST=TU_NICK/' -e 's|^TZ=.*|TZ=America/Mexico_City|' -e 's/^MC_MEMORY=.*/MC_MEMORY=2304M/' -e 's/^CONTAINER_MEM_LIMIT=.*/CONTAINER_MEM_LIMIT=3300m/' -e 's/^MAX_PLAYERS=.*/MAX_PLAYERS=36/' .env && grep -E '^(SERVER_OWNER|WHITELIST|TZ|MC_MEMORY|CONTAINER_MEM_LIMIT|MAX_PLAYERS)=' .env
+```
+
+```bash
+./scripts/install.sh
+```
+
+Termina con **"¡Servidor listo!"** (~5 minutos; el reinicio intermedio tarda 2–3 min, no lo cortes).
+
+### 6.4 Primeros pasos después de instalar
+
+1. **Entra desde Java** con la versión **"Última versión"** del launcher (no una instalación antigua o con mods) a `IP_PUBLICA`.
+2. **Rol de Dueño:** si al escribir en el chat no aparece `[Dueño]` delante de tu nombre (pasa porque el instalador te asignó el rol antes de tu primera conexión), ejecuta `./scripts/roles.sh setup`: debe decir *"Verificado: 'TU_NICK' está en el grupo owner"*.
+3. **Descripción del servidor** (lo que se ve en la lista; `§6`, `§7`, `§a` son colores):
+```bash
+sed -i 's|^MOTD=.*|MOTD=§6Servidor para BUAP §7- §aSurvival|' .env && docker compose up -d mc
+```
+4. **Bedrock:** `./scripts/whitelist.sh bedrock "TuGamertag"` y entra desde Bedrock (puerto 19132) mientras el comando espera (§4.7 del manual). El aviso de "ping alto" en la lista de Bedrock es habitual con Geyser: si dentro del juego responde bien, ignóralo.
+5. **Pregenerar el mundo de noche** (en esta máquina recomendamos 4 × 4 km; tarda 4–8 h por los créditos de CPU):
+```bash
+./scripts/console.sh "chunky radius 2000"
+```
+```bash
+./scripts/console.sh "chunky start"
+```
+   Al terminar (`chunky progress` = 100 %): `./scripts/console.sh "worldborder set 4000"`. Para jugar sin lag mientras tanto: `chunky pause` / `chunky continue`.
+
+A partir de aquí todo es igual que en el [TUTORIAL](TUTORIAL.md) (partes E a L) y el [MANUAL](MANUAL.md).
 
 ## 7. Vigilar el crédito
 
@@ -173,6 +207,11 @@ scp -r azureuser@IP_PUBLICA:/opt/minecraft30/backups ./backups-minecraft
 
 | Problema | Solución |
 |---|---|
+| **Todos** los tamaños salen *NotAvailableForSubscription* | Servicios sin registrar (§3.2) o región no permitida (§3.1) |
+| No aparece `B2pls_v2` en la lista | Marca **Arm64** antes de elegir tamaño (§4) |
+| `ssh` dice *UNPROTECTED PRIVATE KEY FILE* | Ejecuta el `icacls` de §6.1 |
+| `./scripts/...: No such file or directory` | No estás en `/opt/minecraft30`: `cd /opt/minecraft30` (o §6.2, `.bashrc`) |
+| Al instalar: *"El nick 'X' no existe"* | Usa el nick de Java (junto a "Jugar" en el launcher), no el de la cuenta de Microsoft |
 | *Not available for subscription* al elegir el tamaño | Prueba otra región de tu lista (§3) o `Standard_B2als_v2` (imagen x64) |
 | *RequestDisallowedByPolicy* al crear | La región no está permitida para tu suscripción (§3) |
 | El servidor se reinicia solo y el log dice `OOMKilled` o `exit code 137` | `MC_MEMORY` demasiado alto para 4 GB: usa `2304M` / `3300m` |

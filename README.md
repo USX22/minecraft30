@@ -11,6 +11,7 @@ Proyecto de **Sistemas Operativos y Redes**: un servidor de Minecraft Java que
 | **30+ jugadores** | Paper (servidor optimizado), JVM afinada (flags de Aikar), mundo pregenerado. Medido en prueba con 2 núcleos: **90 jugadores (bots) con TPS 20**. Estimación prudente para jugadores reales: **~50–70** con 2 OCPU/12 GB y **~100** con 4 OCPU/24 GB ([MANUAL §3](docs/MANUAL.md#3-cuántos-jugadores-soporta)). Se verifica con una [prueba de carga con bots](docs/06-rendimiento.md) · [resultados](docs/RESULTADOS-PRUEBAS.md). |
 | **Minecraft Java oficial** | Los jugadores usan el cliente **oficial** sin instalar nada; se exigen cuentas oficiales. ViaVersion/ViaBackwards permiten entrar aunque su versión no coincida exactamente. Opcional: el **servidor oficial** de Mojang (vanilla) con una línea en `.env` ([MANUAL §12](docs/MANUAL.md#12-modo-vanilla-servidor-oficial-de-mojang)). |
 | **Bedrock (móvil, Windows, consolas)** | Geyser + Floodgate: los jugadores de Bedrock entran con su cuenta de Xbox/Microsoft, sin comprar Java, al **mismo mundo** ([MANUAL §4.7](docs/MANUAL.md#47-entrar-desde-minecraft-bedrock-móvil-windows-consolas)). |
+| **Clientes no oficiales (opcional)** | Modo "no premium" con contraseña por jugador (AuthMe) para quien no tenga Minecraft comprado: `./scripts/no-premium.sh activar` ([docs/10](docs/10-clientes-no-oficiales.md)). Desactivado por defecto. |
 | **Acceso desde cualquier IP** | Puerto 25565 abierto a `0.0.0.0/0`: se entra desde casa, la universidad o datos móviles. Quién entra lo decide la whitelist (por nick), no la IP. Puerto 443 opcional para redes restrictivas ([MANUAL §9.13](docs/MANUAL.md#913-puerto-alternativo-para-redes-que-bloquean-el-25565)). |
 | **Funcionamiento continuo** | Docker con `restart: unless-stopped`, *healthcheck*, servicio `systemd` que lo levanta al arrancar la VM. |
 | **Gratis o lo más barato posible** | VM *Always Free* de Oracle Cloud (0 $/mes). **Sin tarjeta:** **Azure for Students** con correo institucional (100 $ de crédito, ~3 meses 24/7, 30–36 jugadores medidos) en [docs/09](docs/09-azure-estudiantes.md), o Raspberry Pi en casa + túnel gratuito de playit.gg (0 $, Pi 4: ~10–20 jugadores) en [docs/08](docs/08-raspberry-pi.md). Otras alternativas en [docs/07](docs/07-alternativas-y-costos.md). |
@@ -89,6 +90,8 @@ La primera ejecución crea `.env`: edítalo (tu nick en `SERVER_OWNER`, la white
 ```
 docker-compose.yml        Servicios: servidor (mc) y backups (mc-backup)
 docker-compose.vanilla.yml Modo opcional con el servidor oficial de Mojang
+docker-compose.nopremium.yml Modo opcional para clientes no oficiales (AuthMe)
+docker-compose.prueba.yml Modo temporal para pruebas de carga con bots remotos
 docker-compose.raspberrypi.yml Modo Raspberry Pi / PC de casa: límite de CPU + túnel playit.gg
 .env.example              Plantilla de configuración (el .env real NO va a git)
 .env.raspberrypi.example  Plantilla con valores para Raspberry Pi
@@ -122,4 +125,5 @@ docs/                     Documentación detallada
 6. [Rendimiento y prueba de carga](docs/06-rendimiento.md)
 7. [Alternativas y costos](docs/07-alternativas-y-costos.md)
 8. [Alternativa gratis sin tarjeta: Raspberry Pi](docs/08-raspberry-pi.md)
-9. [Alternativa sin tarjeta con correo de estudiante: Azure for Students](docs/09-azure-estudiantes.md)
+9. [Alternativa sin tarjeta con correo de estudiante: Azure for Students](docs/09-azure-estudiantes.md) (**desplegado y probado**)
+10. [Modo opcional para clientes no oficiales ("no premium")](docs/10-clientes-no-oficiales.md)

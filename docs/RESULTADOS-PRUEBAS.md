@@ -102,6 +102,38 @@ Los bots ([mineflayer](https://github.com/PrismarineJS/mineflayer)) caminan, cor
 | Whitelist de Bedrock (`whitelist.sh bedrock`) | ✅ | Requiere que el jugador haya intentado entrar una vez |
 | Entrar con un cliente Bedrock real | ⏳ | Pendiente para la Fase 2 (Oracle) |
 
+## Fase 2: instalación real en Azure for Students (4–5 de noviembre de 2026)
+
+Máquina **Standard_B2pls_v2** (2 vCPU ARM Ampere, 4 GB), Ubuntu 24.04, **North Central US**, disco SSD estándar de 64 GiB; costo ≈ 33 $/mes del crédito de estudiante.
+
+| Prueba | Resultado | Detalle |
+|---|---|---|
+| `bootstrap-host.sh` en Azure (ARM64) | ✅ | Docker, UFW, fail2ban, swap y servicios sin errores |
+| `install.sh` | ✅ | Nick verificado con Mojang; servidor *healthy* en ~1,5 min; roles creados |
+| Estado | ✅ | TPS 20.0, memoria 2,77 / 3,22 GB, disco 14 % |
+| Versión elegida automáticamente | ✅ | Minecraft 26.1.2 (la más nueva soportada por todos los plugins) |
+| Entrar con Minecraft **Java oficial** desde casa (Puebla) | ✅ | |
+| Prefijo `[Dueño]` en el chat | ✅ tras corrección | El rol se asignó antes de la primera conexión; `roles.sh` ahora lo verifica |
+| Entrar desde **Bedrock** | ✅ tras corrección | Conectó por NetherNet; Floodgate lo identificó como `.Gupyx22` |
+| Backup automático | ✅ | Primer backup a los pocos minutos |
+
+### Problemas reales encontrados en el despliegue y su solución
+
+| Problema | Solución (ya en el proyecto) |
+|---|---|
+| Todos los tamaños "NotAvailableForSubscription" | Registrar `Microsoft.Compute` y `Microsoft.Network` (docs/09 §3.2) |
+| La lista de regiones muestra regiones no permitidas | Consultar la directiva "Allowed resource deployment regions" (docs/09 §3.1) |
+| El formulario no creó el firewall de Azure (NSG) | `scripts/azure-abrir-puertos.sh` en Cloud Shell |
+| Disco por defecto: 30 GiB prémium | Cambiar a 64 GiB SSD estándar (docs/09 §4) |
+| Llave `.pem` rechazada por SSH en Windows | `icacls` para dejarla solo para el usuario (docs/09 §6.1) |
+| Rol de Dueño no aplicado | `roles.sh` verifica la asignación y avisa |
+| Jugador nuevo de Bedrock no se podía añadir ("Unable to find user in our cache") | `whitelist.sh bedrock` abre la whitelist 3 min, lo detecta en el log, lo añade y la cierra |
+| Confusión entre nick de Java y cuenta de Microsoft | Documentado: el nick de Java está junto al botón "Jugar" |
+
+## Modo opcional para clientes no oficiales (AuthMe)
+
+`tests/load/authme-test.js` en el servidor de pruebas: **5/5** (pide registro, sin sesión no puede hablar, `/register`, contraseña incorrecta expulsa, correcta entra). Se detectaron y corrigieron dos valores por defecto de AuthMe que habrían roto el servidor en una clase: **1 registro por IP** (toda la clase comparte IP) y nombres sin punto (los de Bedrock). Además, sus ventanas de registro no funcionan en Bedrock ni en clientes antiguos: se usan los comandos del chat.
+
 ## Errores encontrados y corregidos durante la prueba
 
 | Problema | Impacto | Corrección |
