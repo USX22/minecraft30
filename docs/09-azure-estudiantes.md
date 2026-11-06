@@ -179,6 +179,22 @@ sed -i 's|^MOTD=.*|MOTD=§6Servidor para BUAP §7- §aSurvival|' .env && docker 
 
 A partir de aquí todo es igual que en el [TUTORIAL](TUTORIAL.md) (partes E a L) y el [MANUAL](MANUAL.md).
 
+### 6.5 Un nombre en vez de la IP (gratis)
+
+Azure da gratis un nombre para la IP pública, con la forma `NOMBRE.REGION.cloudapp.azure.com`. En la **Cloud Shell** (cambia `minecraft-buap` por el nombre que quieras: minúsculas, números y guiones; debe estar libre en la región):
+
+```bash
+az network public-ip update -g minecraft30 -n minecraft30-ip --dns-name minecraft-buap --query dnsSettings.fqdn -o tsv
+```
+
+Responde con el nombre completo, por ejemplo `minecraft-buap.northcentralus.cloudapp.azure.com`:
+- **Java:** se escribe ese nombre como dirección del servidor.
+- **Bedrock:** ese nombre y el puerto 19132.
+
+Para cambiarlo, repite el comando con otro `--dns-name`. Si la IP no se llama `minecraft30-ip`, consulta su nombre con `az network public-ip list -g minecraft30 -o table`.
+
+Si prefieres un nombre más corto, sin `cloudapp.azure.com`, crea un subdominio gratis en DuckDNS apuntando a la IP (manual §8.14), o compra un dominio (~10–15 $/año) y crea un registro A hacia la IP.
+
 ## 7. Vigilar el crédito
 
 - **Saldo:** portal → **Education** → *Overview* (o la suscripción → *Overview*).
