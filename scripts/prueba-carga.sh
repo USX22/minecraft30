@@ -22,12 +22,12 @@ case "${1:-}" in
     log "Al terminar: ./scripts/prueba-carga.sh desactivar"
     ;;
   desactivar)
-    log "Volviendo al modo normal (solo cuentas oficiales)..."
+    log "Saliendo del modo prueba (vuelve al modo configurado en .env)..."
     compose up -d mc
     wait_healthy 900 || die "El servidor no arrancó. Revisa: docker compose logs mc"
     log "Quitando bots de la whitelist..."
     for i in $(seq 1 200); do rcon "whitelist remove bot_$i" >/dev/null 2>&1 || true; done
-    log "Modo normal restaurado."
+    log "Modo prueba desactivado. Modo actual: $(./scripts/no-premium.sh estado)"
     ;;
   *) sed -n '2,5p' "$0"; exit 1 ;;
 esac
