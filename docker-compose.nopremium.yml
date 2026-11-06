@@ -1,0 +1,32 @@
+# =============================================================
+#  MODO "NO PREMIUM" (OPCIONAL): permite entrar con clientes de
+#  Minecraft Java NO oficiales (sin cuenta comprada, ej. TLauncher).
+#  Se activa/desactiva con:  ./scripts/no-premium.sh activar | desactivar
+#  Guía y riesgos: docs/10-clientes-no-oficiales.md
+#
+#  - online-mode desactivado: el servidor ya no comprueba las cuentas
+#    con Microsoft. Para que nadie pueda hacerse pasar por otro (por
+#    ejemplo por el dueño), se instala AuthMe: cada jugador se registra
+#    con contraseña (/register) y la usa al entrar (/login).
+#  - La whitelist y los OP se gestionan con el script (en este modo cada
+#    nombre tiene otro identificador UUID), por eso aquí van vacíos.
+#  - Debe repetir la lista de plugins del docker-compose.yml + authmereloaded
+#    (la CI comprueba que no se desincronicen).
+# =============================================================
+services:
+  mc:
+    environment:
+      ONLINE_MODE: "FALSE"
+      ENFORCE_SECURE_PROFILE: "FALSE"
+      WHITELIST: ""
+      OPS: ""
+      MODRINTH_PROJECTS: |-
+        luckperms
+        essentialsx
+        coreprotect
+        chunky
+        lpc-chat
+        viaversion
+        viabackwards
+        ${EXTRA_PLUGINS:-}
+        authmereloaded

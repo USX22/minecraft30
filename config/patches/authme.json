@@ -1,0 +1,42 @@
+{
+  "file": "/data/plugins/AuthMe/config.yml",
+  "ops": [
+    {
+      "$set": {
+        "path": "$.settings.messagesLanguage",
+        "value": "es"
+      }
+    },
+    {
+      "$set": {
+        "path": "$.settings.restrictions.maxRegPerIp",
+        "value": 0,
+        "value-type": "int"
+      }
+    },
+    {
+      "$set": {
+        "path": "$.settings.restrictions.allowedNicknameCharacters",
+        "value": "[a-zA-Z0-9_.]*"
+      }
+    },
+    {
+      "$set": {
+        "path": "$.settings.registration.dialog.preJoin.enable",
+        "value": false
+      }
+    },
+    {
+      "$set": {
+        "path": "$.settings.registration.dialog.postJoin.enable",
+        "value": false
+      }
+    },
+    {
+      "$set": {
+        "path": "$.settings.serverName",
+        "value": "Servidor BUAP"
+      }
+    }
+  ]
+}

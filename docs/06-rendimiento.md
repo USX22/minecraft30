@@ -20,6 +20,8 @@ Minecraft simula el mundo en *ticks*. El objetivo son **20 TPS** (un tick cada 5
 
 ## Dimensionamiento para 30 jugadores
 
+**Capacidad:** Medido en prueba con 2 núcleos: **90 jugadores (bots) con TPS 20**. Estimación prudente para jugadores reales: **~50–70** con 2 OCPU/12 GB y **~100** con 4 OCPU/24 GB; con el servidor oficial vanilla, ~20–30 y ~30–40. Datos en [RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md) y explicación en el [MANUAL §3](MANUAL.md#3-cuántos-jugadores-soporta).
+
 | Recurso | Necesidad estimada (Paper, 30 jugadores, distancia 8) | Asignado (VM 2 OCPU / 12 GB) |
 |---|---|---|
 | RAM del servidor (heap) | 5–8 GB | 8 GB (`MC_MEMORY`) |
@@ -70,7 +72,71 @@ docker compose -f docker-compose.yml -f tests/load/docker-compose.test.yml down
 docker compose up -d
 ```
 
+Con el servidor de prueba arrancado también puedes ejecutar la **prueba automática de roles y moderación** (12 comprobaciones: permisos, mute, kick, tempban, rollback de CoreProtect, inmunidad de admins, whitelist):
+
+```bash
+cd tests/load && node roles-test.js
+```
+
+Resultados reales de este proyecto: [RESULTADOS-PRUEBAS.md](RESULTADOS-PRUEBAS.md).
+
 > Los bots generan **más** carga que jugadores reales en cuanto a movimiento aleatorio, pero no construyen granjas ni redstone. Es una buena estimación, no una garantía.
+
+## Prueba de carga contra el servidor real (bots desde tu computadora)
+
+La forma más realista: el servidor de verdad (en Azure/Oracle) y los bots en **otra** computadora, para que no le quiten CPU. Duración: ~30 minutos. Hazlo **sin jugadores conectados** y con la pregeneración pausada (`./scripts/console.sh "chunky pause"`).
+
+**1. En la VM**, activa el modo prueba (los bots no tienen cuenta oficial; la whitelist sigue activa y solo deja entrar a `bot_1`…`bot_40`):
+
+```bash
+./scripts/prueba-carga.sh activar 40
+```
+
+**2. En tu PC con Windows** (PowerShell). Instala Node.js (una vez) y cierra/abre PowerShell:
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+Descarga los bots:
+
+```powershell
+mkdir $HOME\bots-mc; cd $HOME\bots-mc; iwr https://raw.githubusercontent.com/usx22/minecraft30/claude/eager-newton-q1uimf/tests/load/bots.js -OutFile bots.js; iwr https://raw.githubusercontent.com/usx22/minecraft30/claude/eager-newton-q1uimf/tests/load/package.json -OutFile package.json; npm install
+```
+
+**3. Lanza los bots en dos ventanas de PowerShell** (un solo proceso con muchos bots se satura). Ventana 1:
+
+```powershell
+cd $HOME\bots-mc; $env:HOST="IP_PUBLICA"; $env:BOTS="18"; $env:BOT_START="1"; $env:DELAY_MS="2500"; node bots.js
+```
+
+Ventana 2 (igual pero `BOT_START="19"`):
+
+```powershell
+cd $HOME\bots-mc; $env:HOST="IP_PUBLICA"; $env:BOTS="18"; $env:BOT_START="19"; $env:DELAY_MS="2500"; node bots.js
+```
+
+**4. En la VM, mide** durante 10 minutos (guarda `monitor-<fecha>.csv` para el informe):
+
+```bash
+./scripts/monitor.sh 20
+```
+
+✅ Con `MAX_PLAYERS=36`, entran 36 bots y los demás reciben "Server is full" (eso también prueba el límite). Buen resultado: **TPS ≥ 19** y **MSPT < 40**.
+
+**5. Termina:** `Ctrl+C` en las ventanas de los bots, y en la VM:
+
+```bash
+./scripts/prueba-carga.sh desactivar
+```
+
+Reanuda la pregeneración si estaba en curso: `./scripts/console.sh "chunky continue"`.
+
+## Medir el ping real
+
+- **Java:** en *Multijugador*, pon el ratón sobre las **barritas de señal** del servidor: muestra los milisegundos. < 100 ms es bueno; < 150 ms es jugable.
+- **Bedrock:** el indicador de la lista suele marcar "mala conexión" con servidores Geyser aunque se juegue bien; fíate de cómo responde dentro del juego.
+- Pide a 2–3 compañeros que lo miren desde sus casas: el ping depende de cada conexión.
 
 ## Si hay lag
 

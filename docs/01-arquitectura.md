@@ -11,7 +11,7 @@
 | Backups | [`itzg/mc-backup`](https://github.com/itzg/docker-mc-backup) | Copias periódicas consistentes usando RCON |
 | Permisos | LuckPerms | Grupos y permisos (admin, moderador...) |
 | Moderación | EssentialsX, CoreProtect | Ban/mute/kick/jail; registro y *rollback* de bloques |
-| Diagnóstico | spark, Chunky | Medir TPS/lag; pregenerar el mundo |
+| Diagnóstico | spark (incluido en Paper), Chunky | Medir TPS/lag; pregenerar el mundo |
 
 ## Por qué estas decisiones
 

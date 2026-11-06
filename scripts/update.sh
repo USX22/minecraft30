@@ -39,9 +39,7 @@ after_mc="$(docker image inspect -f '{{.Id}}' itzg/minecraft-server:latest 2>/de
 [[ "$before_mc" != "$after_mc" ]] && log "Hay una imagen nueva del servidor."
 
 log "Reiniciando servicios..."
-compose up -d --force-recreate --remove-orphans
-
-if wait_healthy 900; then
+if start_all --force-recreate --remove-orphans; then
   log "Actualización completada. Servidor en línea."
   docker image prune -f >/dev/null
 else

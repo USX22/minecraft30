@@ -1,0 +1,16 @@
+# =============================================================
+#  MODO PRUEBA DE CARGA (temporal). Lo activa/desactiva:
+#     ./scripts/prueba-carga.sh activar | desactivar
+#  Los bots no tienen cuenta oficial, así que el servidor acepta
+#  cuentas sin verificar (offline) mientras dura la prueba.
+#
+#  ¿Es seguro? La whitelist sigue activa (solo entran bot_1..bot_N)
+#  y en modo offline cada nombre tiene otro identificador (UUID): alguien
+#  que entrara como "TuNick" NO tendría tus roles ni tu OP, y además no
+#  pasaría la whitelist. Aun así, desactívalo al terminar.
+# =============================================================
+services:
+  mc:
+    environment:
+      ONLINE_MODE: "FALSE"
+      ENFORCE_SECURE_PROFILE: "FALSE"

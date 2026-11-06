@@ -11,7 +11,7 @@ echo "=== Jugadores ==="
 rcon list || true
 echo
 echo "=== TPS (20 = perfecto) ==="
-rcon tps || true
+if is_vanilla; then rcon "tick query" || true; else rcon tps || true; fi
 echo
 echo "=== Recursos ==="
 docker stats --no-stream mc mc-backup || true

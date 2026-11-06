@@ -6,8 +6,8 @@ Se aplica **defensa en profundidad**: varias capas independientes, de modo que s
 
 | # | Capa | Medida | Protege contra |
 |---|---|---|---|
-| 1 | Red de Oracle | *Security List*: solo 22 y 25565 | Escaneo y acceso a cualquier otro servicio |
-| 2 | Firewall de la VM | iptables (Oracle) o UFW: solo 22 y 25565; UFW limita intentos al 22 | Servicios expuestos por error |
+| 1 | Red de Oracle | *Security List*: solo 22, 25565 (Java) y 19132-19133 (Bedrock) | Escaneo y acceso a cualquier otro servicio |
+| 2 | Firewall de la VM | iptables (Oracle) o UFW: solo 22, 25565 y 19132-19133; UFW limita intentos al 22 | Servicios expuestos por error |
 | 3 | Anti-flood | Cadena `DOCKER-USER`: máx. 40 conexiones simultáneas y ~60 nuevas/min por IP (`scripts/firewall.sh`) | Bots, ataques de login masivo, agotamiento de conexiones |
 | 4 | SSH | Solo llave pública, sin root, `MaxAuthTries 3` | Fuerza bruta de contraseñas |
 | 5 | fail2ban | Bloquea 1 h la IP tras 5 fallos de SSH en 10 min | Fuerza bruta sostenida |
@@ -44,7 +44,9 @@ Las reglas anti-flood frenan abusos de una IP, pero no un DDoS distribuido de gr
 ```bash
 sudo ss -tlnp
 ```
-Solo deben escucharse públicamente el 22 y el 25565 (el 25575 **no** debe aparecer).
+Solo deben escucharse públicamente el 22, el 25565 y el 19132 (TCP); con `sudo ss -ulnp`, el 19132 y 19133 (UDP). El 25575 **no** debe aparecer.
+
+> Los jugadores de Bedrock se autentican con su cuenta de Xbox/Microsoft a través de Floodgate, que firma sus datos con una llave privada propia (`data/plugins/floodgate/key.pem`, generada automáticamente; no la compartas). La whitelist y los roles se aplican igual que en Java.
 
 ```bash
 sudo iptables -L MC-PROTECT -n -v

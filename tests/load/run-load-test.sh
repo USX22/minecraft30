@@ -19,8 +19,8 @@ trap 'kill $BOTS_PID 2>/dev/null || true' EXIT
 echo "fecha,jugadores,tps" > tests/load/resultados.csv
 for _ in $(seq 1 20); do
   sleep 30
-  players="$(docker compose "${CF[@]}" exec -T mc rcon-cli list | grep -oE '[0-9]+' | head -1)"
-  tps="$(docker compose "${CF[@]}" exec -T mc rcon-cli tps | sed 's/§.//g' | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+  players="$(docker compose "${CF[@]}" exec -T mc rcon-cli list | sed 's/§.//g;s/\x1b\[[0-9;]*m//g' | grep -oE '[0-9]+' | head -1)"
+  tps="$(docker compose "${CF[@]}" exec -T mc rcon-cli tps | sed 's/§.//g;s/\x1b\[[0-9;]*m//g' | grep -oE '[0-9]+\.[0-9]+' | head -1)"
   echo "$(date +%T),$players,$tps" | tee -a tests/load/resultados.csv
 done
 echo "Resultados en tests/load/resultados.csv"

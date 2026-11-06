@@ -36,10 +36,10 @@ Actualizar a mano en cualquier momento:
 ```
 
 ### Cambiar de versión de Minecraft
-Por defecto `MC_VERSION=LATEST`. Para un servidor estable, **fija la versión** (p. ej. `MC_VERSION=1.21.4`) y súbela a propósito cuando los plugins sean compatibles:
+Por defecto `MC_VERSION_AUTO=true`: se usa la versión más nueva que soportan **todos** los plugins, así el servidor nunca deja de arrancar por un plugin desactualizado. Para fijar una versión concreta (`MC_VERSION_AUTO=false`):
 
 1. Haz backup: `./scripts/backup-now.sh`
-2. Cambia `MC_VERSION` en `.env`.
+2. En `.env`: `MC_VERSION_AUTO=false` y `MC_VERSION=26.1.2` (por ejemplo).
 3. `./scripts/update.sh --ahora`
 
 > Nunca bajes de versión un mundo ya abierto con una versión más nueva: restaura un backup anterior.
@@ -80,7 +80,7 @@ Los backups en la misma VM no sirven si se pierde la VM. Opciones gratuitas:
 **a) Copiar a tu computadora** (lo más simple):
 
 ```bash
-rsync -avz -e "ssh -i tu_llave" ubuntu@IP_PUBLICA:~/minecraft30/backups/ ./backups-minecraft/
+rsync -avz -e "ssh -i tu_llave" ubuntu@IP_PUBLICA:/opt/minecraft30/backups/ ./backups-minecraft/
 ```
 
 **b) Automático a la nube con rclone** (Google Drive 15 GB gratis, o Oracle Object Storage 20 GB *Always Free*). En la VM:
@@ -92,5 +92,5 @@ sudo apt install -y rclone && rclone config
 Crea un *remote* llamado `nube` y añade a `crontab -e`:
 
 ```
-30 */12 * * * rclone copy ~/minecraft30/backups nube:minecraft-backups --max-age 13h
+30 */12 * * * rclone copy /opt/minecraft30/backups nube:minecraft-backups --max-age 13h
 ```

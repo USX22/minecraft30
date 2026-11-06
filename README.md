@@ -2,13 +2,22 @@
 
 Proyecto de **Sistemas Operativos y Redes**: un servidor de Minecraft Java que
 
+> 🚀 **[TUTORIAL PASO A PASO](docs/TUTORIAL.md)**: una sola lista de pasos, para cualquier persona, desde cero hasta el servidor instalado y **probado** (con tabla de resultados para el informe).
+>
+> 📘 **[MANUAL COMPLETO](docs/MANUAL.md)**: instalación desde cero, conceptos técnicos explicados y guías para jugadores, moderadores, admins, dueño y administradores de sistema.
+
 | Requisito | Cómo se cumple |
 |---|---|
-| **30+ jugadores** | Paper (servidor optimizado), JVM afinada (flags de Aikar), mundo pregenerado; límite de 40 jugadores. Se verifica con una [prueba de carga con bots](docs/06-rendimiento.md). |
+| **30+ jugadores** | Paper (servidor optimizado), JVM afinada (flags de Aikar), mundo pregenerado. Medido en prueba con 2 núcleos: **90 jugadores (bots) con TPS 20**. Estimación prudente para jugadores reales: **~50–70** con 2 OCPU/12 GB y **~100** con 4 OCPU/24 GB ([MANUAL §3](docs/MANUAL.md#3-cuántos-jugadores-soporta)). Se verifica con una [prueba de carga con bots](docs/06-rendimiento.md) · [resultados](docs/RESULTADOS-PRUEBAS.md). |
+| **Minecraft Java oficial** | Los jugadores usan el cliente **oficial** sin instalar nada; se exigen cuentas oficiales. ViaVersion/ViaBackwards permiten entrar aunque su versión no coincida exactamente. Opcional: el **servidor oficial** de Mojang (vanilla) con una línea en `.env` ([MANUAL §12](docs/MANUAL.md#12-modo-vanilla-servidor-oficial-de-mojang)). |
+| **Bedrock (móvil, Windows, consolas)** | Geyser + Floodgate: los jugadores de Bedrock entran con su cuenta de Xbox/Microsoft, sin comprar Java, al **mismo mundo** ([MANUAL §4.7](docs/MANUAL.md#47-entrar-desde-minecraft-bedrock-móvil-windows-consolas)). |
+| **Clientes no oficiales (opcional)** | Modo "no premium" con contraseña por jugador (AuthMe) para quien no tenga Minecraft comprado: `./scripts/no-premium.sh activar` ([docs/10](docs/10-clientes-no-oficiales.md)). Desactivado por defecto. |
+| **Ampliable: plugins, datapacks y bot de Discord** | `./scripts/plugins.sh agregar <plugin>` (comprueba compatibilidad), datapacks sin que los jugadores instalen nada, y administración desde Discord con `./scripts/discord.sh` ([docs/11](docs/11-mods-plugins-y-bots.md)). |
+| **Acceso desde cualquier IP** | Puerto 25565 abierto a `0.0.0.0/0`: se entra desde casa, la universidad o datos móviles. Quién entra lo decide la whitelist (por nick), no la IP. Puerto 443 opcional para redes restrictivas ([MANUAL §9.13](docs/MANUAL.md#913-puerto-alternativo-para-redes-que-bloquean-el-25565)). |
 | **Funcionamiento continuo** | Docker con `restart: unless-stopped`, *healthcheck*, servicio `systemd` que lo levanta al arrancar la VM. |
-| **Gratis o lo más barato posible** | VM *Always Free* de Oracle Cloud (0 $/mes). Alternativas en [docs/07](docs/07-alternativas-y-costos.md). |
+| **Gratis o lo más barato posible** | VM *Always Free* de Oracle Cloud (0 $/mes). **Sin tarjeta:** **Azure for Students** con correo institucional (100 $ de crédito, ~3 meses 24/7, 30–36 jugadores medidos) en [docs/09](docs/09-azure-estudiantes.md), o Raspberry Pi en casa + túnel gratuito de playit.gg (0 $, Pi 4: ~10–20 jugadores) en [docs/08](docs/08-raspberry-pi.md). Otras alternativas en [docs/07](docs/07-alternativas-y-costos.md). |
 | **Seguro** | Whitelist, cuentas oficiales (`online-mode`), contenedor sin root, firewall + anti-flood, SSH solo con llave, fail2ban, anti-xray, RCON no expuesto. Ver [docs/03](docs/03-seguridad.md). |
-| **Administradores y moderadores** | LuckPerms con jerarquía `jugador < moderador < admin < dueño`, más EssentialsX (ban/mute/kick) y CoreProtect (deshacer *griefing*). Ver [docs/04](docs/04-administracion.md). |
+| **Administradores y moderadores** | LuckPerms con jerarquía `jugador < moderador < admin < dueño`, más EssentialsX (ban/mute/kick) y CoreProtect (deshacer *griefing*). Varios **administradores de sistema** con acceso SSH propio (`scripts/sysadmins.sh`). Ver [docs/04](docs/04-administracion.md). |
 | **Actualizable** | Actualización semanal automática con aviso a jugadores y backup previo; Paper y plugins se actualizan solos. Ver [docs/05](docs/05-actualizaciones-y-backups.md). |
 | **Backups** | Cada 6 h, comprimidos, 7 días de retención, restauración con un comando. |
 
@@ -42,20 +51,22 @@ Más detalle y relación con los temas del curso en [docs/01-arquitectura.md](do
 
 Guía completa paso a paso: **[docs/02-despliegue-oracle-cloud.md](docs/02-despliegue-oracle-cloud.md)**.
 
+> ¿Oracle no acepta tu tarjeta? Con **correo institucional**: **[docs/09-azure-estudiantes.md](docs/09-azure-estudiantes.md)** (Azure for Students, sin tarjeta). En casa: **[docs/08-raspberry-pi.md](docs/08-raspberry-pi.md)** (Raspberry Pi o PC). Los comandos son los mismos.
+
 En una VM Ubuntu 22.04/24.04 recién creada:
 
 ```bash
-git clone https://github.com/usx22/minecraft30.git ~/minecraft30
+sudo git clone https://github.com/usx22/minecraft30.git /opt/minecraft30 && sudo chown -R "$USER": /opt/minecraft30
 ```
 
 ```bash
-cd ~/minecraft30 && sudo ./scripts/bootstrap-host.sh
+cd /opt/minecraft30 && sudo ./scripts/bootstrap-host.sh
 ```
 
 Cierra la sesión SSH, vuelve a entrar y:
 
 ```bash
-cd ~/minecraft30 && ./scripts/install.sh
+cd /opt/minecraft30 && ./scripts/install.sh
 ```
 
 La primera ejecución crea `.env`: edítalo (tu nick en `SERVER_OWNER`, la whitelist, la memoria) y ejecuta `./scripts/install.sh` otra vez. Al terminar, conéctate a `IP-PÚBLICA:25565`.
@@ -68,6 +79,7 @@ La primera ejecución crea `.env`: edítalo (tu nick en `SERVER_OWNER`, la white
 | Añadir jugadores a la whitelist | `./scripts/whitelist.sh agregar Nick1 Nick2` |
 | Hacer moderador / admin | `./scripts/roles.sh mod Nick` · `./scripts/roles.sh admin Nick` |
 | Quitar rol | `./scripts/roles.sh quitar Nick` |
+| Añadir administrador de sistema | `sudo ./scripts/sysadmins.sh agregar usuario "ssh-ed25519 AAAA..."` |
 | Consola del servidor | `./scripts/console.sh` o `./scripts/console.sh "say Hola"` |
 | Backup inmediato | `./scripts/backup-now.sh` |
 | Restaurar backup | `./scripts/restore.sh` (lista) · `./scripts/restore.sh backups/ARCHIVO` |
@@ -78,7 +90,12 @@ La primera ejecución crea `.env`: edítalo (tu nick en `SERVER_OWNER`, la white
 
 ```
 docker-compose.yml        Servicios: servidor (mc) y backups (mc-backup)
+docker-compose.vanilla.yml Modo opcional con el servidor oficial de Mojang
+docker-compose.nopremium.yml Modo opcional para clientes no oficiales (AuthMe)
+docker-compose.prueba.yml Modo temporal para pruebas de carga con bots remotos
+docker-compose.raspberrypi.yml Modo Raspberry Pi / PC de casa: límite de CPU + túnel playit.gg
 .env.example              Plantilla de configuración (el .env real NO va a git)
+.env.raspberrypi.example  Plantilla con valores para Raspberry Pi
 config/patches/           Ajustes de Paper versionados (anti-xray, límites de entidades)
 scripts/
   bootstrap-host.sh       Prepara y asegura la VM (Docker, firewall, SSH, fail2ban, swap, systemd)
@@ -90,6 +107,11 @@ scripts/
   backup-now.sh/restore.sh Backups
   update.sh               Actualización segura
   firewall.sh             Reglas anti-flood (iptables DOCKER-USER)
+  sysadmins.sh            Alta/baja de administradores de sistema (SSH)
+  plugins.sh              Plugins adicionales de Modrinth (con comprobación de compatibilidad)
+  discord.sh              Bot de Discord para administrar el servidor (DiscordSRV)
+  no-premium.sh           Modo opcional para clientes no oficiales (AuthMe)
+  prueba-carga.sh / monitor.sh  Prueba de carga con bots remotos y mediciones
 systemd/                  Servicios y timer de systemd
 tests/load/               Prueba de carga con 35 bots (mineflayer)
 docs/                     Documentación detallada
@@ -98,6 +120,8 @@ docs/                     Documentación detallada
 
 ## Documentación
 
+**[TUTORIAL PASO A PASO](docs/TUTORIAL.md)** (empieza aquí) · **[MANUAL COMPLETO](docs/MANUAL.md)** (referencia). Documentos temáticos:
+
 1. [Arquitectura y conceptos de SO/Redes](docs/01-arquitectura.md)
 2. [Despliegue en Oracle Cloud (paso a paso)](docs/02-despliegue-oracle-cloud.md)
 3. [Seguridad](docs/03-seguridad.md)
@@ -105,3 +129,7 @@ docs/                     Documentación detallada
 5. [Actualizaciones y backups](docs/05-actualizaciones-y-backups.md)
 6. [Rendimiento y prueba de carga](docs/06-rendimiento.md)
 7. [Alternativas y costos](docs/07-alternativas-y-costos.md)
+8. [Alternativa gratis sin tarjeta: Raspberry Pi](docs/08-raspberry-pi.md)
+9. [Alternativa sin tarjeta con correo de estudiante: Azure for Students](docs/09-azure-estudiantes.md) (**desplegado y probado**)
+10. [Modo opcional para clientes no oficiales ("no premium")](docs/10-clientes-no-oficiales.md)
+11. [Mods, plugins, datapacks y bots (Discord y de prueba)](docs/11-mods-plugins-y-bots.md)

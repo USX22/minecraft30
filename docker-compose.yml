@@ -1,6 +1,8 @@
 # =============================================================
 #  Servidor Minecraft para 30+ jugadores
-#  - mc:     servidor Paper (fork optimizado de Minecraft)
+#  - mc:     servidor Paper (fork optimizado de Minecraft Java)
+#            Para usar el servidor OFICIAL de Mojang (vanilla) ver
+#            docker-compose.vanilla.yml y COMPOSE_FILE en .env
 #  - backup: copias de seguridad automáticas del mundo
 #  Las variables vienen de .env (ver .env.example)
 # =============================================================
@@ -24,13 +26,21 @@ services:
     pids_limit: 2048
 
     ports:
-      # ÚNICO puerto expuesto a internet. RCON (25575) NO se publica.
-      - "25565:25565/tcp"
+      # Puertos expuestos a internet. RCON (25575) NO se publica.
+      - "25565:25565/tcp"            # Minecraft Java Edition
+      # Minecraft Bedrock (móvil, Windows, consolas) vía Geyser:
+      - "19132:19132/udp"            # conexión clásica (RakNet)
+      - "19132:19132/tcp"            # "señalización" del método nuevo (NetherNet)
+      - "19133:19133/udp"            # conexión nueva (NetherNet / WebRTC)
 
     environment:
       EULA: "TRUE"
-      TYPE: PAPER
+      TYPE: PAPER                    # docker-compose.vanilla.yml lo cambia a VANILLA
       VERSION: ${MC_VERSION:-LATEST}
+      # true = usar la versión de Minecraft más nueva que soporten TODOS los
+      # plugins (evita que el servidor no arranque porque un plugin aún no se
+      # actualizó). Para fijar MC_VERSION a mano, pon MC_VERSION_AUTO=false.
+      VERSION_FROM_MODRINTH_PROJECTS: ${MC_VERSION_AUTO:-true}
       TZ: ${TZ:-UTC}
 
       # Memoria y flags de JVM recomendadas para Paper (Aikar)
@@ -62,21 +72,40 @@ services:
       #  luckperms   -> roles: admin, moderador, etc.
       #  essentialsx -> kick/ban/mute/tempban, homes, tpa...
       #  coreprotect -> registro de bloques y rollback anti-griefing
-      #  spark       -> diagnóstico de rendimiento (TPS, lag)
       #  chunky      -> pregeneración del mundo (evita lag al explorar)
+      #  (spark, para diagnosticar lag, ya viene incluido dentro de Paper)
+      #  lpc-chat    -> muestra en el chat el prefijo del rol ([Mod], [Admin]...)
+      #  EXTRA_PLUGINS (en .env) -> plugins adicionales, con ./scripts/plugins.sh
+      #  viaversion + viabackwards -> permiten entrar con el Minecraft Java
+      #               OFICIAL aunque la versión del jugador no coincida
+      #               exactamente con la del servidor
       MODRINTH_PROJECTS: |-
         luckperms
         essentialsx
         coreprotect
-        spark
         chunky
+        lpc-chat
+        viaversion
+        viabackwards
+        ${EXTRA_PLUGINS:-}
       MODRINTH_DOWNLOAD_DEPENDENCIES: required
+      # Soporte para Minecraft BEDROCK (móvil, Windows, consolas), desde el sitio
+      # oficial de GeyserMC (última versión en cada arranque):
+      #  Geyser    -> traduce el protocolo de Bedrock al de Java
+      #  Floodgate -> los jugadores de Bedrock entran con su cuenta de Xbox/
+      #               Microsoft, sin necesitar comprar la edición Java
+      PLUGINS: |-
+        https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
+        https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
 
       # Operación
       STOP_SERVER_ANNOUNCE_DELAY: 30 # avisa en el chat 30 s antes de apagar
       ENABLE_ROLLING_LOGS: "true"
       ENABLE_AUTOPAUSE: "FALSE"      # siempre encendido (servicio continuo)
       PATCH_DEFINITIONS: /patches
+      # Permite enviar comandos a la consola y leer su respuesta en el log
+      # (necesario para comandos asíncronos como los de LuckPerms)
+      CREATE_CONSOLE_IN_PIPE: "true"
 
     volumes:
       - ./data:/data

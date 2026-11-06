@@ -1,5 +1,7 @@
 # 4. Administración: roles, moderación y comandos
 
+> Versión resumida. La guía completa por rol está en el [MANUAL](MANUAL.md) (§5–§7 y §9).
+
 ## Jerarquía de roles
 
 ```
@@ -49,6 +51,7 @@ OP de vanilla es "todo o nada": un moderador con OP puede darse creativo, borrar
 | Modo espectador | `/gamemode spectator` |
 | Ver información de un jugador | `/whois Nick` · `/seen Nick` |
 | Añadir a whitelist | `/whitelist add Nick` |
+| Anuncio a todos | `/broadcast mensaje` |
 | Ver TPS / salud | `/tps` · `/spark healthreport` |
 
 ### Investigar y revertir griefing (CoreProtect)
@@ -65,7 +68,6 @@ OP de vanilla es "todo o nada": un moderador con OP puede darse creativo, borrar
 | Acción | Comando |
 |---|---|
 | Ban permanente | `/ban Nick motivo` |
-| Anuncio a todos | `/broadcast mensaje` |
 | Modo creativo | `/gamemode creative` |
 | Crear cárcel | `/setjail nombre` |
 | Fijar spawn | `/setspawn` |
