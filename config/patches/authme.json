@@ -31,6 +31,12 @@
         "path": "$.settings.registration.dialog.postJoin.enable",
         "value": false
       }
+    },
+    {
+      "$set": {
+        "path": "$.settings.serverName",
+        "value": "Servidor BUAP"
+      }
     }
   ]
 }
