@@ -95,7 +95,21 @@ Para quitarlo: `./scripts/console.sh "datapack disable \"file/mi-datapack.zip\""
 Con [DiscordSRV](https://modrinth.com/plugin/discordsrv) el servidor tiene un bot en tu servidor de Discord:
 - **#minecraft-chat:** el chat del juego aparece en Discord y lo que se escribe en Discord aparece en el juego. Cualquiera puede escribir `playerlist` para ver quién está conectado.
 - **#consola-admin** (privado): todo lo que escribas ahí se ejecuta **como la consola del servidor** — `whitelist add Nick`, `lp user Nick parent set moderador`, `kick Nick`, `list`, `tps`… Ideal para administrar desde el celular sin SSH.
-- En #minecraft-chat, quien tenga el rol **Admin Minecraft** puede ejecutar comandos con `!c <comando>` (ej. `!c whitelist add Nick`).
+- En #minecraft-chat se pueden ejecutar comandos con `!c <comando>` (ej. `!c kick Nick spam`):
+  - Rol **Admin Minecraft**: cualquier comando.
+  - Rol **Moderador Minecraft**: solo comandos de moderación (`list`, `tps`, `say`, `kick`, `mute`, `tempban`, `unban`, `whitelist`, `fwhitelist`, `co`, `seen`).
+  - Los demás no pueden usar `!c`.
+
+### Roles en Discord y en el juego
+
+Son dos cosas separadas: el rol **del juego** (LuckPerms) decide lo que alguien puede hacer dentro de Minecraft; el rol **de Discord** decide lo que puede hacer desde Discord. Al nombrar a alguien, dale los dos:
+
+| Persona | En el juego (consola o #consola-admin) | Rol en Discord | #consola-admin |
+|---|---|---|---|
+| Moderador | `lp user Nick parent set moderador` | **Moderador Minecraft** | No |
+| Admin | `lp user Nick parent set admin` | **Admin Minecraft** | Sí (si confías en él: ahí tiene poder total) |
+
+Crea el rol *Moderador Minecraft* en Discord (Ajustes del servidor → Roles) y aplica la configuración con `./scripts/discord.sh roles`.
 
 ### 4.1 Crear el bot en Discord (10 minutos)
 

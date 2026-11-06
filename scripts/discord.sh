@@ -3,17 +3,30 @@
 # Guía para crear el bot y obtener los IDs: docs/11-mods-plugins-y-bots.md §4
 #   ./scripts/discord.sh configurar <TOKEN_DEL_BOT> <ID_CANAL_CHAT> <ID_CANAL_CONSOLA>
 #   ./scripts/discord.sh estado
+#   ./scripts/discord.sh roles       # aplica los roles Admin/Moderador Minecraft
 #   ./scripts/discord.sh quitar
 # Qué hace el bot:
 #   - Canal de chat: une el chat del juego y el de Discord (en ambos sentidos).
 #   - Canal de CONSOLA: todo lo que se escribe ahí se ejecuta como consola del
 #     servidor (whitelist, roles, kick...). Hazlo visible SOLO para admins.
-#   - En el canal de chat, quien tenga el rol "Admin Minecraft" puede usar
-#     !c <comando>; cualquiera puede escribir "playerlist" para ver quién juega.
+#   - En el canal de chat: rol "Admin Minecraft" -> !c <cualquier comando>;
+#     rol "Moderador Minecraft" -> !c solo con comandos de moderación;
+#     cualquiera puede escribir "playerlist" para ver quién juega.
 source "$(dirname "$0")/lib.sh"
 
 CFG=data/plugins/DiscordSRV/config.yml
 ROL="Admin Minecraft"
+ROL_MOD="Moderador Minecraft"
+# Comandos que el rol "Moderador Minecraft" puede usar con !c en #minecraft-chat
+CMDS_MOD='"list", "tps", "say", "kick", "mute", "tempban", "unban", "whitelist", "fwhitelist", "co", "seen"'
+
+aplicar_roles() {
+  sudo sed -i \
+    -e "s|^DiscordChatChannelConsoleCommandRolesAllowed: .*|DiscordChatChannelConsoleCommandRolesAllowed: [\"$ROL\", \"$ROL_MOD\"]|" \
+    -e "s|^DiscordChatChannelConsoleCommandWhitelist: .*|DiscordChatChannelConsoleCommandWhitelist: [$CMDS_MOD]|" \
+    -e "s|^DiscordChatChannelConsoleCommandWhitelistBypassRoles: .*|DiscordChatChannelConsoleCommandWhitelistBypassRoles: [\"$ROL\"]|" \
+    "$CFG"
+}
 
 instalado() { grep -qE '^EXTRA_PLUGINS=.*discordsrv' .env 2>/dev/null; }
 
@@ -33,9 +46,8 @@ case "${1:-}" in
       -e "s|^BotToken: .*|BotToken: \"$token\"|" \
       -e "s|^Channels: .*|Channels: {\"global\": \"$chat\"}|" \
       -e "s|^DiscordConsoleChannelId: .*|DiscordConsoleChannelId: \"$consola\"|" \
-      -e "s|^DiscordChatChannelConsoleCommandRolesAllowed: .*|DiscordChatChannelConsoleCommandRolesAllowed: [\"$ROL\"]|" \
-      -e "s|^DiscordChatChannelConsoleCommandWhitelistBypassRoles: .*|DiscordChatChannelConsoleCommandWhitelistBypassRoles: [\"$ROL\"]|" \
       "$CFG"
+    aplicar_roles
     sudo chmod 640 "$CFG"   # contiene el token del bot
     log "Configuración guardada. Reiniciando para conectar el bot..."
     compose restart mc
@@ -46,6 +58,12 @@ case "${1:-}" in
     docker logs --since 10m mc 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | grep -iE "DiscordSRV" \
       | grep -iE "connected|ready|token|invalid|intent|error|channel" | tail -6
     echo "(Si dice 'Disallowed intents': activa SERVER MEMBERS INTENT y MESSAGE CONTENT INTENT en el bot, docs/11 §4)" ;;
+  roles)  # aplica los roles de Discord (Admin/Moderador Minecraft) sin tocar el token
+    [[ -f "$CFG" ]] || die "DiscordSRV no está configurado."
+    aplicar_roles
+    compose restart mc
+    wait_healthy 900 || die "El servidor no volvió a arrancar."
+    log "Roles aplicados: '$ROL' = todos los comandos con !c; '$ROL_MOD' = solo moderación." ;;
   quitar)
     instalado || die "DiscordSRV no está instalado."
     ./scripts/plugins.sh quitar discordsrv ;;
