@@ -117,6 +117,20 @@ Máquina **Standard_B2pls_v2** (2 vCPU ARM Ampere, 4 GB), Ubuntu 24.04, **North 
 | Entrar desde **Bedrock** | ✅ tras corrección | Conectó por NetherNet; Floodgate lo identificó como `.Gupyx22` |
 | Backup automático | ✅ | Primer backup a los pocos minutos |
 
+### Prueba de carga en Azure (6 de noviembre de 2026)
+
+Servidor real en Azure (B2pls_v2, 2 vCPU ARM, 4 GB, `MC_MEMORY=2304M`), mundo pregenerado de 4 × 4 km, **36 bots** lanzados desde una PC doméstica en Puebla en 2 procesos (`scripts/prueba-carga.sh` + `tests/load/bots.js`), medido con `scripts/monitor.sh` durante 10 minutos (20 muestras):
+
+| Medida | Mínimo | Promedio | Máximo |
+|---|---|---|---|
+| Jugadores | 36 | 36 | 36 (= `MAX_PLAYERS`) |
+| **TPS** | **20,0** | **20,0** | **20,0** |
+| MSPT (ms por tick, límite 50) | 11,2 | 13,4 | 15,3 |
+| CPU (100 % = 1 núcleo de 2) | 60 % | 83 % | 104 % |
+| RAM del contenedor | 2,856 GiB | 2,86 GiB | 2,872 GiB (límite 3,22) |
+
+**Conclusión:** con 36 jugadores el servidor usó ~27 % del tiempo de cada tick y ~42 % de la CPU de la máquina; TPS perfecto en todas las mediciones y memoria estable. **El requisito de 30 jugadores se cumple con margen** en la máquina de 4 GB de Azure for Students.
+
 ### Problemas reales encontrados en el despliegue y su solución
 
 | Problema | Solución (ya en el proyecto) |
